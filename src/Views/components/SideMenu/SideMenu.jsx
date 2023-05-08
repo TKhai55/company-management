@@ -1,42 +1,53 @@
 import React from 'react'
 import { Menu} from 'antd';
-import './SideMenu.css'
-import { useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faSearch, faPager } from '@fortawesome/free-solid-svg-icons';
+import './SideMenu.css'
 
 let myArray = [
-  { label: 'test 10', key: ''},
-  { label: 'test 2', key: 'test2' },
-  { label: 'test 3', key: 'test3'},
-  // ...
+  {
+    key: 'home',
+    to: '/',
+    label: 'Home',
+  },
+  {
+    key: 'about',
+    to: '/test2',
+    label: 'About',
+  },
+  {
+    key: 'contact',
+    to: '/test3',
+    label: 'Contact',
+  },
 ];
+
 myArray.forEach(item => {
-  if(item.label ==='test 10')
+  if(item.label ==='Home')
     item.icon = <FontAwesomeIcon icon={faHome}/>
-  if(item.label ==='test 2')
+  if(item.label ==='About')
     item.icon = <FontAwesomeIcon icon={faSearch}/>
-  if(item.label ==='test 3')
+  if(item.label ==='Contact')
     item.icon = <FontAwesomeIcon icon={faPager}/>
 });
 
 console.log(myArray)
 const menuItems = myArray.map((obj) => (
   <Menu.Item key={obj.key} icon={obj.icon}>
-    {obj.label}
+      <NavLink to={obj.to}>
+        {obj.label}
+      </NavLink>
   </Menu.Item>
 ));
 
 
 const SideMenu = () => {
-    const navigate = useNavigate()
   return (
         <Menu
         mode='inline'
         className='SideMenu-container'
-        onClick={({key})=>{
-          navigate(key)
-        }}>
+        >
           {menuItems}
         </Menu>
    
