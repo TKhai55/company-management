@@ -1,11 +1,29 @@
-import React from 'react'
+import React, { useContext, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import Header from "./Header/Header";
+import SideMenu from "./SideMenu/SideMenu";
+import { AuthContext } from "./Context/AuthProvider";
+import { Navigate } from "react-router-dom";
 import './Test.css'
 import { Button } from 'antd'
-import Header from './Header/Header'
-import SideMenu from './SideMenu/SideMenu'
 
 const Test = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const role = state && state.role;
+
+  // const { user, isAuthenticated } = useContext(AuthContext);
+
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate("/");
+  //   }
+  // }, [isAuthenticated, user, navigate]);
+
+  // console.log("being homepage", { isAuthenticated });
+
   return (
+
     <div className="App-container">
       <Header/>
       <div className="App-Content-container">
@@ -22,4 +40,4 @@ const Test = () => {
   )
 }
 
-export default Test
+export default Test;

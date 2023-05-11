@@ -10,16 +10,18 @@
     left: 0;
     right: 0;
     z-index: 1;
+    background-color:rgb(243, 242, 242);
 }
 .header-container #logo{
     margin-left: 2vw;
     height: 7.5vh;
 }
 .header-container .icon-btn{
-    width: 3vh;
-    height: 3vh;
-    margin-right: 2vw;
+    width: 2.5vh;
+    height: 2.5vh;
+    /* margin-right: 2vw; */
 }
+
 .header-container #avatar{
     border-radius: 50%;
     width: 5vh;
@@ -31,4 +33,18 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 5px;
+}
+
+.header-btn-container .icon-btn-container {
+    background-color: rgb(199, 199, 199);
+    /* outline: 1px dashed red; */
+    padding: 5px;
+    border-radius: 50%;
+    line-height: 100%;
+}
+
+.header-btn-container .icon-btn-container:hover {
+    cursor: pointer;
+    scale: 1.1;
 }
