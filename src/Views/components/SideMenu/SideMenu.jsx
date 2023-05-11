@@ -1,37 +1,24 @@
 import React from 'react'
-import { Menu} from 'antd';
-import './SideMenu.css'
-import { useNavigate } from 'react-router-dom'
+import { Menu } from 'antd';
+import { NavLink } from 'react-router-dom';
+import './SideMenu.css';
+import SideMenuController from '../../../Controls/SideMenuController';
 
-let myArray = [
-  { label: 'test 10', key: 'test1', icon: 'SettingOutlined' },
-  { label: 'test 2', key: 'test2', icon: 'SettingOutlined' },
-  { label: 'test 3', key: 'test3', icon: 'SettingOutlined' },
-  // ...
-];
+const SideMenu = () => {
+  const functions = SideMenuController()
+  console.log(functions)
 
-const menuItems = myArray.map((obj) => (
-  <Menu.Item key={obj.key} icon={React.createElement(obj.icon)}>
-    {obj.label}
-  </Menu.Item>
-));
+  const menuItems = functions.map((obj) => (
+    <Menu.Item key={obj.id} icon={obj.icon}>
+      <NavLink to={obj.link}>{obj.label}</NavLink>
+    </Menu.Item>
+  ));
 
-const SideMenu = ({role}) => {
-    const navigate = useNavigate()
-    console.log("Role received in SideMenu:", role);
-    if (role.includes("admin")) {
-      return (
-          <Menu
-          mode='inline'
-          className='SideMenu-container'
-          onClick={({key})=>{
-            navigate(key)
-        }}
-        >
-          {menuItems}
-        </Menu>
-  )
-    }
-}
+  return (
+    <Menu mode="inline" className="SideMenu-container">
+      {menuItems}
+    </Menu>
+  );
+};
 
-export default SideMenu
+export default SideMenu;
