@@ -1,153 +1,113 @@
-.large-div {
-  width: 100%;
-  height: 200vh;
+* {
+  padding: 0;
+  margin: 0;
+}
+
+#register-form-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100vw;
+  height: 100vh;
 }
 
-.Login-Wrapper {
-  width: 80%;
-  height: 80vh;
+#register-form-wrapper #register-form-background {
   display: flex;
-  flex-direction: row;
-  border-radius: 10px;
+  width: 1200px;
+  height: 650px;
+  border-radius: 20px;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
     rgba(0, 0, 0, 0.3) 0px 30px 60px -30px,
     rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
 }
 
-.Right-Screen {
-  width: 50%;
+#register-form-wrapper #register-form-background #register-form-logo {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content h1 {
-  font-weight: 500;
-  padding: 8px 0;
-}
-
-.main-content p {
-  padding: 8px 0;
-  font-size: 1.8vh;
-  color: rgb(88, 89, 90);
-  font-weight: 500;
-}
-
-.main-content form {
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content form input {
-  padding: 4px;
-  margin: 8px 0;
-  width: 25vw;
-  height: 3vh;
-  border-radius: 4px;
-  border-color: rgb(204, 204, 204);
-}
-
-.main-content form label {
-  margin-top: 1vh;
-  font-size: 1.8vh;
-  font-weight: 500;
-}
-
-.main-content form input:focus {
-  box-shadow: rgba(86, 98, 98, 0.2) 0px 7px 29px 0px;
-}
-
-.main-content .check-forgot {
-  padding: 8px 0;
-  margin-bottom: 8px;
-}
-
-.main-content .check-forgot label {
-  font-size: 1.8vh;
-  text-align: center;
-  padding: 8px 0;
-  margin-right: 7.2vw;
-  font-weight: 500;
-  color: rgb(57, 57, 57);
-}
-
-.main-content .check-forgot a {
-  font-size: 1.8vh;
-  color: rgb(25, 0, 255);
-  font-weight: 500;
-}
-
-.main-content .check-forgot input {
-  margin-right: 0.5vw;
-}
-
-.main-content .signin-btn {
-  height: 5vh;
-  padding: 4px;
-  margin-bottom: 16px;
-  border-radius: 5px;
-  border: none;
-  color: #fff;
-  background-color: rgb(72, 0, 255);
-  font-weight: 500;
-}
-
-.main-content .gg-btn {
-  display: flex;
-  flex-direction: row;
-  height: 5vh;
-  padding: 4px;
-  margin-bottom: 16px;
-  border-radius: 5px;
-  background-color: rgb(255, 255, 255);
-  font-weight: 500;
-  justify-content: center;
-  align-items: center;
-  border-color: rgb(202, 205, 207);
-}
-
-.main-content .signin-btn:hover {
-  background-color: rgb(53, 46, 194);
-}
-
-.main-content .btn-text {
-  margin-left: 1vw;
-}
-
-.main-content .gg-btn:hover {
-  background-color: rgb(221, 221, 229);
-}
-
-.main-content .last-line {
-  text-align: center;
-  color: rgb(57, 57, 57);
-}
-
-.main-content .last-line a {
-  color: rgb(25, 0, 255);
-}
-
-.Left-Screen {
-  width: 50%;
   background-color: rgb(215, 215, 215);
+  height: 100%;
+  width: 50%;
+  border-radius: 20px 0 0 20px;
+}
+
+#register-form-wrapper #register-form-background #register-form-input-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 100%;
+}
+
+#register-form-background #register-form-input-details #register-form-header {
+  font-weight: bolder;
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
+#register-form-user-pass-wrapper {
+  /* background-color: #005eec; */
+  width: 80%;
+}
+
+#register-form-background #register-form-input-details #register-form-details,
+#register-form-already-account {
+  font-size: 15px;
+  color: gray;
+  margin-top: 7px;
+}
+
+#register-form-input-details .register-form-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+#register-form-input-details .register-form-input label {
+  font-size: 13px;
+}
+
+.register-form-input .register-form-input-component {
+  height: 35px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid rgb(194, 194, 194);
+  margin-top: 3px;
+  box-sizing: border-box;
+  padding-left: 15px;
+}
+
+.register-form-input .register-form-input-component:focus {
+  outline: none !important;
+  border: 1.5px solid black;
+}
+
+#register-form-background
+  #register-form-input-details
+  #register-form-other-details {
+  width: 55%;
+}
+
+#register-form-input-details
+  .register-form-create-account-button {
+  margin-top: 20px;
+  border: none;
+  background-color: #005eec;
+  color: white;
+  font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 0 10px 10px 0;
+  gap: 10px;
 }
 
-.Left-Screen img {
+#register-form-input-details
+  .register-form-create-account-button:hover {
+    background-color: #1b6de9;
+    cursor: pointer;
+  }
+
+#register-form-logo img {
   width: 40%;
-}
-
-.main-content a {
-  text-decoration: none;
 }

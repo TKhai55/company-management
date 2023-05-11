@@ -1,9 +1,7 @@
 import React from 'react'
 import { Menu} from 'antd';
-import type { MenuProps } from 'antd';
 import './SideMenu.css'
 import { useNavigate } from 'react-router-dom'
-import { UserOutlined, SettingOutlined } from '@ant-design/icons';
 
 let myArray = [
   { label: 'test 10', key: 'test1', icon: 'SettingOutlined' },
@@ -18,20 +16,22 @@ const menuItems = myArray.map((obj) => (
   </Menu.Item>
 ));
 
-
-const SideMenu = () => {
+const SideMenu = ({role}) => {
     const navigate = useNavigate()
-  return (
-        <Menu
-        mode='inline'
-        className='SideMenu-container'
-        onClick={({key})=>{
-          navigate(key)
-        }}>
+    console.log("Role received in SideMenu:", role);
+    if (role.includes("admin")) {
+      return (
+          <Menu
+          mode='inline'
+          className='SideMenu-container'
+          onClick={({key})=>{
+            navigate(key)
+        }}
+        >
           {menuItems}
         </Menu>
-   
   )
+    }
 }
 
 export default SideMenu
