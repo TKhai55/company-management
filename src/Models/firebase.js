@@ -1,16 +1,23 @@
-import firebase from 'firebase/app';
+import { initializeApp } from "firebase/app";
 import 'firebase/database';
+import {
+  getFirestore, collection,
+} from 'firebase/firestore'
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAdZ1YVlladTrLXk2mpcGxUXQgRRkLKg4c",
-  authDomain: "project-1-dad3a.firebaseapp.com",
-  projectId: "project-1-dad3a",
-  storageBucket: "project-1-dad3a.appspot.com",
-  messagingSenderId: "116920897626",
-  appId: "1:116920897626:web:4830a46c20ac1ad62b8863",
-  measurementId: "G-YENZ26KDCY"
+  apiKey: "AIzaSyCJu0HgxMdL2KBXEHYOVB6mjHMBKdFxPY4",
+  authDomain: "company-management-6a229.firebaseapp.com",
+  projectId: "company-management-6a229",
+  storageBucket: "company-management-6a229.appspot.com",
+  messagingSenderId: "217168167925",
+  appId: "1:217168167925:web:26a24a35db1dad4a4456bc",
+  measurementId: "G-SXV3Z57TRZ"
 };
 
-firebase.initializeApp(config);
+// init firebase
+const app = initializeApp(firebaseConfig);
 
-export default firebase;
+// init services
+const db = getFirestore(app);
+
+export default db;
