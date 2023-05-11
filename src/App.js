@@ -21,9 +21,10 @@ function App() {
   return (
 
         <Routes>
-          <Route Component={Login} path="/" />
+          {/* <Route Component={Login} path="/" />
           <Route Component={HomePage} path="/homepage" />
-          <Route Component={Chatbox} path="/chatbox" />
+          <Route Component={Chatbox} path="/chatbox" /> */}
+          <Route path="/" element={<Test/>} />
           <Route path="/createacc" element={<Test/>} />
           <Route path="/manageacc" element={<Test/>} />
           <Route path="/createrole" element={<Test/>} />
