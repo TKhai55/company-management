@@ -4,40 +4,30 @@ import Header from "./Header/Header";
 import SideMenu from "./SideMenu/SideMenu";
 import { AuthContext } from "./Context/AuthProvider";
 import { Navigate } from "react-router-dom";
-import './Test.css'
-import { Button } from 'antd'
+import "./Test.css";
+import { Button } from "antd";
 
 const Test = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
   const role = state && state.role;
 
-  // const { user, isAuthenticated } = useContext(AuthContext);
-
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate("/");
-  //   }
-  // }, [isAuthenticated, user, navigate]);
-
-  // console.log("being homepage", { isAuthenticated });
-
   return (
-
     <div className="App-container">
-      <Header/>
+      <Header />
       <div className="App-Content-container">
-        <SideMenu/>
+        <SideMenu role={role} />
         <div className="App-Content-Main">
-        <div>
+          <div>
             Test2
-            <Button onClick={()=> window.open('/video', 'blank')}>Click</Button>
-         </div>
+            <Button onClick={() => window.open("/video", "blank")}>
+              Click
+            </Button>
+          </div>
         </div>
       </div>
     </div>
-    
-  )
-}
+  );
+};
 
 export default Test;
