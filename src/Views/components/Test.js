@@ -18,7 +18,7 @@ const Test = () => {
       <div className="App-Content-container">
         <SideMenu role={role} />
         <div className="App-Content-Main">
-          <div style={{ height: "200%" }}>
+          <div>
             Test2
             <Button onClick={() => window.open("/video", "blank")}>
               Click
