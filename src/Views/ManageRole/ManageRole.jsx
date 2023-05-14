@@ -9,7 +9,7 @@ function ManageRole() {
       <div className="App-Content-container">
         <SideMenu/>
         <div className="App-Content-Main">
-        <div style={{height: "200%"}}>
+        <div>
             Manage Role
          </div>
         </div>

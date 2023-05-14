@@ -7,9 +7,12 @@ import Chatbox from "./Views/chat/chatbox";
 import JitsiMeet from "./Views/JitsiMeet";
 import Test from "./Views/components/Test";
 import ManageRole from "./Views/ManageRole/ManageRole";
-
+import CreateRole from "./Views/CreateRole/CreateRole";
+import {MenuProvider} from './Controls/SideMenuProvider'
 
 const islogin = true;
+
+
 
 function App() {
   if(islogin === false) return(
@@ -19,7 +22,7 @@ function App() {
   ) 
   else 
   return (
-
+    <MenuProvider>
         <Routes>
           {/* <Route Component={Login} path="/" />
           <Route Component={HomePage} path="/homepage" />
@@ -27,10 +30,11 @@ function App() {
           <Route path="/" element={<Test/>} />
           <Route path="/createacc" element={<Test/>} />
           <Route path="/manageacc" element={<Test/>} />
-          <Route path="/createrole" element={<Test/>} />
+          <Route path="/createrole" element={<CreateRole/>} />
           <Route path="/managerole" element={<ManageRole/>} />
           <Route path="/video" element={<JitsiMeet/>} />
       </Routes>
+    </MenuProvider>
   );
 }
 
