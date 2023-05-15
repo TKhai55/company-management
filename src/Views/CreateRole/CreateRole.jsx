@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Header from '../components/Header/Header'
 import SideMenu from '../components/SideMenu/SideMenu'
 import './CreateRole.css'
@@ -7,6 +7,9 @@ import CreateRoleController, { AddRoleData, DeleteRoleData, EditRoleData }  from
 import { Table, Space,Form, Button, InputNumber, Input} from 'antd'
 import DeleteModal from '../components/Modals/ModalDelete'
 import CustomModal from '../components/Modals/Modal'
+import { db } from '../../Models/firebase/config' 
+import { getDocs, collection } from 'firebase/firestore'
+
 
 
 function CreateRole() {
@@ -41,15 +44,15 @@ function CreateRole() {
             <Button 
             style={{ backgroundColor: '#4ca3f5',color:'#ffffff' }}
             onClick={() => {
-              setIsEditModalVisible(true)
               setrecordID(record.id)
+              setIsEditModalVisible(true)
             }}
             >Edit</Button>
             <Button 
             style={{ backgroundColor: 'red',color:'#ffffff' }}
             onClick={() => {
-              setIsDeleteModalVisible(true)
               setrecordID(record.id)
+              setIsDeleteModalVisible(true)
             }}
             >Delete</Button>
           </Space>
@@ -57,7 +60,18 @@ function CreateRole() {
       },
     ];
 
-    const tableItems =  CreateRoleController();
+    const colRef = collection(db, "Role");
+
+    const fetchData = async () => {
+    const querySnapshot = await getDocs(colRef);
+    const data = [];
+    querySnapshot.forEach((doc) => {
+      data.push({ id: doc.id, ...doc.data() });
+    });
+    settableItems(data)
+  }
+
+    const [tableItems, settableItems] = useState(CreateRoleController())
     const [searchText, setSearchText] = useState('');
     const [recordId, setrecordID] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -66,6 +80,11 @@ function CreateRole() {
     const [confirmCreateLoading, setConfirmCreateLoading] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [confirmEditLoading, setConfirmEditLoading] = useState(false);
+
+
+    useEffect(()=>{
+      fetchData()
+    })
 
     const filteredItems = tableItems.filter(
       (item) =>
@@ -87,10 +106,11 @@ function CreateRole() {
       if (documentId) {
         formRef.current.resetFields();
         console.log('Data Edited successfully');
+        fetchData()
       }
       setIsEditModalVisible(false);
       setConfirmEditLoading(false);
-    }, 1500);
+    }, 1000);
   };
 
     const handleCreateCancel = () => {
@@ -107,10 +127,11 @@ function CreateRole() {
         if (documentId) {
           formRef.current.resetFields();
           console.log('Data saved successfully');
+          fetchData()
         }
         setIsCreateModalVisible(false);
         setConfirmCreateLoading(false);
-      }, 1500);
+      }, 1000);
     };
 
     const handleDeleteOk = () => {
@@ -126,10 +147,11 @@ function CreateRole() {
         if (documentId) {
           formRef.current.resetFields();
           console.log('Data deleted successfully');
+          fetchData()
         }
         setIsDeleteModalVisible(false);
         setConfirmDeleteLoading(false);
-      }, 1500);
+      }, 1000);
     };
 
     const handleDeleteCancel = () => {
