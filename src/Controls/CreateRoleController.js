@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react'
 import { db } from '../Models/firebase/config'
 import { getDocs, collection } from 'firebase/firestore'
@@ -38,9 +39,26 @@ const DeleteRoleData = async ( docId) => {
   try {
     const docRef = db.collection('Role').doc(docId);
     await docRef.delete();
-    console.log('Document deleted successfully!');
+    DeleteRoleFunctionData(docId);
+    console.log('Document Role deleted successfully!');
   } catch (error) {
-    console.error('Error deleting document: ', error);
+    console.error('Error Role deleting document: ', error);
+    return null
+  }
+};
+
+const DeleteRoleFunctionData = async ( docId) => {
+  try {
+    const collectionRef = db.collection('RoleFunction');
+    const querySnapshot = await collectionRef.where('role', '==', docId).get();
+    const batch = db.batch();
+    querySnapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+    console.log('Document Role Function deleted successfully!');
+  } catch (error) {
+    console.error('Error Role Function deleting document: ', error);
     return null
   }
 };

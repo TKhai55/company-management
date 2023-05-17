@@ -4,7 +4,7 @@ import Header from '../components/Header/Header'
 import SideMenu from '../components/SideMenu/SideMenu'
 import './CreateRole.css'
 import CreateRoleController, { AddRoleData, DeleteRoleData, EditRoleData }  from '../../Controls/CreateRoleController'
-import { Table, Space,Form, Button, InputNumber, Input} from 'antd'
+import { Table, Space,Form, Button, InputNumber, Input, message} from 'antd'
 import DeleteModal from '../components/Modals/ModalDelete'
 import CustomModal from '../components/Modals/Modal'
 import { db } from '../../Models/firebase/config' 
@@ -63,15 +63,17 @@ function CreateRole() {
     const colRef = collection(db, "Role");
 
     const fetchData = async () => {
-    const querySnapshot = await getDocs(colRef);
-    const data = [];
-    querySnapshot.forEach((doc) => {
-      data.push({ id: doc.id, ...doc.data() });
-    });
-    settableItems(data)
-  }
+      const querySnapshot = await getDocs(colRef);
+      const data = [];
+      querySnapshot.forEach((doc) => {
+        data.push({ id: doc.id, ...doc.data() });
+      });
+      return data;
+    };
 
-    const [tableItems, settableItems] = useState(CreateRoleController())
+
+    const [tableItems, setTableItems] = useState([])
+    // let tableItems = []
     const [searchText, setSearchText] = useState('');
     const [recordId, setrecordID] = useState('');
     const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -82,9 +84,15 @@ function CreateRole() {
     const [confirmEditLoading, setConfirmEditLoading] = useState(false);
 
 
-    useEffect(()=>{
-      fetchData()
-    })
+    const getData = async () => {
+      const data = await fetchData();
+      setTableItems(data);
+    };
+
+    useEffect(() => {
+      getData();
+    }, []);
+
 
     const filteredItems = tableItems.filter(
       (item) =>
@@ -102,12 +110,10 @@ function CreateRole() {
     setConfirmEditLoading(true);
     setTimeout(async () => {
       const formValues = formRef.current.getFieldValue('priority');
-      const documentId = await EditRoleData(recordId, formValues);
-      if (documentId) {
-        formRef.current.resetFields();
-        console.log('Data Edited successfully');
-        fetchData()
-      }
+      await EditRoleData(recordId, formValues);
+      message.success(`Edit successfully!`)
+      formRef.current.resetFields();
+      getData()
       setIsEditModalVisible(false);
       setConfirmEditLoading(false);
     }, 1000);
@@ -125,10 +131,11 @@ function CreateRole() {
         console.log(formValues);
         const documentId = await AddRoleData(formValues);
         if (documentId) {
+          message.success(`Create ${formValues.name} successfully!`)
           formRef.current.resetFields();
           console.log('Data saved successfully');
-          fetchData()
-        }
+          getData()
+        } 
         setIsCreateModalVisible(false);
         setConfirmCreateLoading(false);
       }, 1000);
@@ -138,17 +145,14 @@ function CreateRole() {
       setConfirmDeleteLoading(true);
       setTimeout(async () => {
         if(recordId === '4nyDFcYo2Ulai5BMKc39') {
-          alert('Không thể xóa Admin');
+          message.error('Can not delete Admin role!!!')
           setIsDeleteModalVisible(false);
           setConfirmDeleteLoading(false);
           return;
         }
-        const documentId = await DeleteRoleData(recordId);
-        if (documentId) {
-          formRef.current.resetFields();
-          console.log('Data deleted successfully');
-          fetchData()
-        }
+        await DeleteRoleData(recordId);
+        message.success(`Delete successfully!`)
+        getData()
         setIsDeleteModalVisible(false);
         setConfirmDeleteLoading(false);
       }, 1000);
