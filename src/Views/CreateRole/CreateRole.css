@@ -5,17 +5,17 @@
     /* justify-content: center; */
     flex-direction: column;
 }
-.role-table{
+.CreateRole-container .role-table{
     width: 80%;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;  
     border-radius: 10px;
 }
-.role-create{
+.CreateRole-container .role-create{
     display: flex;
     justify-content: space-between;
     padding: 0 0 3vh 0;
 }
-.role-create #role-btn-create{
+.CreateRole-container .role-create #role-btn-create{
     align-self: flex-start;
     margin-right: 10%;
     background-color: rgb(54, 247, 74);
@@ -23,11 +23,11 @@
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
 
 }
-.role-table-container{
+.CreateRole-container .role-table-container{
     display: flex;
     justify-content: center;
 }
-.role-create-search{
+.CreateRole-container .role-create-search{
     width: 25%;
     margin-left: 10%;
     align-self: flex-end;
