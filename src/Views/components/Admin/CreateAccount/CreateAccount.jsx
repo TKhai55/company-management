@@ -9,9 +9,11 @@ import SideMenu from '../../SideMenu/SideMenu';
 import * as XLSX from "xlsx";
 import * as FileSaver from 'file-saver';
 import Step4 from './Step4';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../../Models/firebase/config';
 import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { useContext } from 'react';
+import { AuthContext } from '../../Context/AuthProvider';
 
 
 const CreateAccount = () => {
@@ -22,6 +24,7 @@ const CreateAccount = () => {
   const [roleColumnIndex, setRoleColumnIndex] = useState(null)
   const [isFileUploaded, setIsFileUploaded] = useState(false)
   const [tableAccount, setTableAccount] = useState([])
+  const { email, password } = useContext(AuthContext);
 
   const handleTableData = (data) => {
     setTableData(data)
@@ -94,16 +97,11 @@ const CreateAccount = () => {
 
         await addNewUser(username, password);
       }
-
-      // setCurrent(current + 1);
+      signInWithEmailAndPassword(auth, email, password)
     }
     else {
       setCurrent(current + 1)
     }
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
   };
 
   const handleDoneButton = () => {
@@ -119,6 +117,7 @@ const CreateAccount = () => {
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
 
   const contentStyle = {
+    overFlow: "hidden",
     lineHeight: 'fit-content',
     textAlign: 'center',
     color: token.colorTextTertiary,
@@ -144,12 +143,7 @@ const CreateAccount = () => {
                   Export .xlsx file
                 </Button>
               )}
-              {/* {current > 0 && (
-          <Button style={{ margin: '0 8px' }} onClick={() => prev()}>
-            Previous
-          </Button>
-        )} */}
-              {current < steps.length - 1 && (
+              {current < steps.length - 1 && isFileUploaded && (
                 <Button style={{ marginTop: "20px" }} type="primary" onClick={() => next()}>
                   Next
                 </Button>

@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header/Header";
@@ -11,7 +10,6 @@ import { MenuProvider } from "../../Controls/SideMenuProvider";
 
 const Test = () => {
   const { state } = useLocation();
-  const navigate = useNavigate();
   const role = state && state.role;
 
   console.log({ role });
