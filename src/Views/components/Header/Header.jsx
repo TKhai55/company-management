@@ -10,9 +10,12 @@ import { auth } from '../../../Models/firebase/config'
 import { useContext } from 'react'
 import { AuthContext } from '../Context/AuthProvider'
 import { updateProfile } from 'firebase/auth'
+import { MenuContext } from '../../../Controls/SideMenuProvider'
 
 
 const Header = () => {
+  const {updateRoleID} = useContext(MenuContext);
+
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const navigate = useNavigate()
   const { isAuthenticated, user: { displayName, photoURL, email } } = useContext(AuthContext)
@@ -44,7 +47,10 @@ const Header = () => {
     <div>
       <Typography.Text>{displayName ? displayName : email}</Typography.Text>
       <br />
-      <Button onClick={() => auth.signOut()}>Log out</Button>
+      <Button onClick={() => {
+        updateRoleID('')
+        auth.signOut()
+      }}>Log out</Button>
     </div>
   );
   return (

@@ -1,40 +1,52 @@
+
 import React, { useState, useEffect } from 'react';
-import {db} from '../Models/firebase/config'
-import { getDocs, collection, query, where } from 'firebase/firestore'
+import { db } from '../Models/firebase/config';
+import { getDocs, collection, query, where } from 'firebase/firestore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faUsers, faUserGear, faUsersGear, faNewspaper } from '@fortawesome/free-solid-svg-icons';
+import {
+  faUser,
+  faUsers,
+  faUserGear,
+  faUsersGear,
+  faNewspaper,
+} from '@fortawesome/free-solid-svg-icons';
 
-const SideMenuController = () => {
-  const key = '4nyDFcYo2Ulai5BMKc39'
-
-  const q = query(collection(db, "RoleFunction"), where("role", "==", key));
-  const colRef = collection(db, "Functions");
+const SideMenuController = (roleID) => {
+  const q = query(collection(db, 'RoleFunction'), where('role', '==', roleID));
+  const colRef = collection(db, 'Functions');
   const [rolefunctions, setRoleFunctions] = useState([]);
-
   const fetchData = async () => {
-    // lần lượt đọc lấy dữ liệu từ 2 collection vào 2 mảng
-    const [rolefunctionsSnapshot, functionsSnapshot] = await Promise.all([
-      getDocs(q),
-      getDocs(colRef),
-    ]);
-    // tạo mảng rolefunctionsData
-    const rolefunctionsData = rolefunctionsSnapshot.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-    }));
-    // tạo mảng functionsData
-    const functionsData = functionsSnapshot.docs.map((doc) => ({
-      ...doc.data(),
-      id: doc.id,
-      icon: getIconByLabel(doc.data().label),
-    }));
-    combinationArray(rolefunctionsData, functionsData);
-    setRoleFunctions(rolefunctionsData);
+    try {
+      const [rolefunctionsSnapshot, functionsSnapshot] = await Promise.all([
+        getDocs(q),
+        getDocs(colRef),
+      ]);
+
+      const rolefunctionsData = rolefunctionsSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+
+      const functionsData = functionsSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+        icon: getIconByLabel(doc.data().label),
+      }));
+
+      combinationArray(rolefunctionsData, functionsData);
+      setRoleFunctions(rolefunctionsData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [roleID]);
 
   const combinationArray = (rolefunctionsData, functionsData) => {
     const functionMap = new Map();
-    // tạo mảng con chứ các thông tin từ Functions
+
     functionsData.forEach((func) => {
       functionMap.set(func.label, {
         label: func.label,
@@ -43,7 +55,6 @@ const SideMenuController = () => {
       });
     });
 
-    //dùng mảng con đã tạo để kết hợp với mảng chính từ RoleFunctions
     rolefunctionsData.forEach((rf) => {
       const func = functionMap.get(rf.function);
       if (func) {
@@ -54,7 +65,6 @@ const SideMenuController = () => {
     });
   };
 
-  // tạo icon cho mỗi tab screen
   const getIconByLabel = (label) => {
     if (label === 'News') return <FontAwesomeIcon icon={faNewspaper} />;
     if (label === 'Create Account') return <FontAwesomeIcon icon={faUser} />;
@@ -64,11 +74,6 @@ const SideMenuController = () => {
     return null;
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-  
-  // trả về mảng được sort theo số thứ tự xuất hiện
   return rolefunctions.sort((a, b) => a.stt - b.stt);
 };
 

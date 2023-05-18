@@ -10,6 +10,7 @@ import { useContext } from "react";
 import { AuthContext } from "../components/Context/AuthProvider";
 import { useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
+import { MenuContext } from '../../Controls/SideMenuProvider';
 
 const Login = () => {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [roleArray, setRoleArray] = useState([])
+  const { updateRoleID } = useContext(MenuContext);
 
   useEffect(() => {
     ; (async () => {
@@ -38,9 +40,11 @@ const Login = () => {
         const user = userCredential.user;
         roleArray.map(role => {
           if (user.email.startsWith("ad") && role.key.includes("ad") && isAuthenticated) {
+            updateRoleID(role.id);
             navigate("/homepage", { state: { role: role.id } })
           }
           else if (user.email.startsWith("ep") && role.key.includes("ep") && isAuthenticated) {
+            updateRoleID(role.id);
             navigate("/homepage", { state: { role: role.id } })
           }
         })

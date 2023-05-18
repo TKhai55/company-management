@@ -2,15 +2,14 @@ import React, { useContext } from 'react';
 import { Menu } from 'antd';
 import { NavLink, useLocation } from 'react-router-dom';
 import './SideMenu.css';
-import SideMenuController from '../../../Controls/SideMenuController';
-import { MenuContext } from '../Context/MenuContext';
+import { MenuContext } from '../../../Controls/SideMenuProvider'
 
 const SideMenu = () => {
-  const functions = useContext(MenuContext);
+  const {items} = useContext(MenuContext);
   const location = useLocation();
   console.log('Hàm được load lại');
 
-  const menuItems = functions.map((obj) => (
+  const menuItems = items.map((obj) => (
     <Menu.Item key={obj.id} icon={obj.icon} className={location.pathname === obj.link ? 'active' : ''}>
       <NavLink to={obj.link} >{obj.label}</NavLink>
     </Menu.Item>

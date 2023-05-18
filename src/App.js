@@ -9,6 +9,8 @@ import Test from "./Views/components/Test";
 import ManageRole from "./Views/ManageRole/ManageRole";
 import CreateRole from "./Views/CreateRole/CreateRole";
 import {MenuProvider} from './Controls/SideMenuProvider'
+import News from "./Views/News/News";
+import CreateAccount from './Views/components/Admin/CreateAccount/CreateAccount'
 
 function App() {
   return (
@@ -16,10 +18,10 @@ function App() {
       <MenuProvider>
         <Routes>
           <Route element={<Login/>} path="/" />
+          <Route path="/news" element={<News/>} />
           <Route element={<HomePage/>} path="/homepage" />
           <Route element={<Chatbox/>} path="/chatbox" />
-          {/* <Route path="/news" element={<News/>} /> */}
-          {/* <Route path="/createacc" element={<CreateAccount/>} /> */}
+          <Route path="/createacc" element={<CreateAccount/>} />  
           <Route path="/manageacc" element={<Test/>} />
           <Route path="/createrole" element={<CreateRole/>} />
           <Route path="/managerole" element={<ManageRole/>} />
