@@ -14,6 +14,8 @@ const Test = () => {
   const navigate = useNavigate();
   const role = state && state.role;
 
+  console.log({ role });
+
   return (
     // <MenuProvider>
     <div className="App-container">

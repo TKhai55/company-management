@@ -6,32 +6,9 @@ import SideMenuController from '../../../Controls/SideMenuController';
 import { MenuContext } from '../Context/MenuContext';
 
 const SideMenu = () => {
-
   const functions = useContext(MenuContext);
-//   const functions =  [   {
-//     label: 'News',
-//     link: '/',
-//   },
-//   {
-//     label: 'Create Account',
-//     link: '/createacc',
-//   },
-//   {
-//     label: 'Manage Account',
-//     link: '/manageacc',
-//   },
-//   {
-//     label: 'Create Role',
-//     link: '/createrole',
-//   },
-//   {
-//     label: 'Manage Role',
-//     link: '/managerole',
-//   },
-// ]
   const location = useLocation();
   console.log('Hàm được load lại');
-
 
   const menuItems = functions.map((obj) => (
     <Menu.Item key={obj.id} icon={obj.icon} className={location.pathname === obj.link ? 'active' : ''}>
