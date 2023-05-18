@@ -24,18 +24,10 @@ export default function AuthProvider({ children }) {
         });
         setIsAuthenticated(true);
         setIsLoading(false);
-        // navigate("/homepage");
-        // if (email.startsWith("ad")) {
-        //   navigate("/homepage", { state: { role: "admin" } });
-        //   return;
-        // } else if (email.startsWith("tp")) {
-        //   navigate("/homepage", { state: { role: "departmenthead" } });
-        //   return;
-        // }
+      } else {
+        setIsLoading(false);
+        navigate("/");
       }
-
-      setIsLoading(false);
-      navigate("/");
     });
 
     return () => {

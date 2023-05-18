@@ -7,33 +7,27 @@ import Chatbox from "./Views/chat/chatbox";
 import JitsiMeet from "./Views/JitsiMeet";
 import Test from "./Views/components/Test";
 import ManageRole from "./Views/ManageRole/ManageRole";
-
+import CreateAccount from "./Views/components/Admin/CreateAccount/CreateAccount";
 import CreateRole from "./Views/CreateRole/CreateRole";
 import {MenuProvider} from './Controls/SideMenuProvider'
 
-// const islogin = true;
-
 function App() {
-  // if(islogin === false) return(
-  //   <Routes>
-  //     <Route path="/signin" element={<Login/>} />
-  //   </Routes>
-  // )
-  // else
   return (
-    <MenuProvider>
+    <AuthProvider>
+      <MenuProvider>
         <Routes>
-          {/* <Route Component={Login} path="/" />
-          <Route Component={HomePage} path="/homepage" />
-          <Route Component={Chatbox} path="/chatbox" /> */}
-          <Route path="/" element={<Test/>} />
-          <Route path="/createacc" element={<Test/>} />
-          <Route path="/manageacc" element={<Test/>} />
-          <Route path="/createrole" element={<CreateRole/>} />
-          <Route path="/managerole" element={<ManageRole/>} />
-          <Route path="/video" element={<JitsiMeet/>} />
-      </Routes>
-    </MenuProvider>
+          <Route path="/" element={<Login />} />
+          <Route path="/homepage" element={<HomePage />} />
+          <Route path="/chatbox" element={<Chatbox />} />
+          <Route path="/createacc" element={<CreateAccount />} />
+          <Route path="/manageacc" element={<Test />} />
+          <Route path="/createrole" element={<Test />} />
+          <Route path="/managerole" element={<ManageRole />} />
+          <Route path="/video" element={<JitsiMeet />} />
+        </Routes>
+      </MenuProvider>
+    </AuthProvider>
+
   );
 }
 
