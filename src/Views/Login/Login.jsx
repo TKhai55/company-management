@@ -1,33 +1,55 @@
 import React from "react";
 import "./Login.css";
 import logo from "./../../images/main logo.png";
-import {BsArrowRight} from "react-icons/bs"
+import { BsArrowRight } from "react-icons/bs"
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import firebase, {auth} from "../../Models/firebase/config"
+import firebase, { auth, db } from "../../Models/firebase/config"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../components/Context/AuthProvider";
+import { useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
 
 const Login = () => {
   const navigate = useNavigate()
+  const { isAuthenticated } = useContext(AuthContext)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [roleArray, setRoleArray] = useState([])
+
+  useEffect(() => {
+    ; (async () => {
+      const collectionRef = collection(db, "Role")
+      const snapshots = await getDocs(collectionRef)
+      const docs = snapshots.docs.map((doc) => {
+        const data = doc.data()
+        data.id = doc.id
+
+        return data
+      })
+      setRoleArray(docs)
+    })()
+  }, [])
 
   const handleSignIn = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        if (user.email.startsWith("ad")) {
-          navigate("/homepage", { state: { role: "admin" } })
-        }
-        else if (user.email.startsWith("tp")) {
-          navigate("/homepage", { state: { role: "departmenthead" } })
-        }
+        roleArray.map(role => {
+          if (user.email.startsWith("ad") && role.key.includes("ad") && isAuthenticated) {
+            navigate("/homepage", { state: { role: role.id } })
+          }
+          else if (user.email.startsWith("ep") && role.key.includes("ep") && isAuthenticated) {
+            navigate("/homepage", { state: { role: role.id } })
+          }
+        })
         return
       })
       .catch((error) => {
         const errorMessage = error.message;
- 
-        console.log({errorMessage})
+
+        console.log({ errorMessage })
       });
   }
   return (
@@ -61,15 +83,15 @@ const Login = () => {
 
               />
             </div>
-          <div className="register-form-input">
-              <button 
-              className="register-form-input-component register-form-create-account-button"
-              onClick={handleSignIn}
+            <div className="register-form-input">
+              <button
+                className="register-form-input-component register-form-create-account-button"
+                onClick={handleSignIn}
               >
                 Sign in
-                <BsArrowRight/>
+                <BsArrowRight />
               </button>
-          </div>
+            </div>
           </div>
         </div>
       </div>

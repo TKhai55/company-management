@@ -6,7 +6,7 @@ import SideMenuController from '../../../Controls/SideMenuController';
 
 const SideMenu = () => {
   const functions = SideMenuController()
-  console.log(functions)
+  // console.log(functions)
 
   const menuItems = functions.map((obj) => (
     <Menu.Item key={obj.id} icon={obj.icon}>
