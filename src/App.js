@@ -7,6 +7,7 @@ import Chatbox from "./Views/chat/chatbox";
 import JitsiMeet from "./Views/JitsiMeet";
 import Test from "./Views/components/Test";
 import ManageRole from "./Views/ManageRole/ManageRole";
+import News from "./Views/News/News";
 
 import CreateRole from "./Views/CreateRole/CreateRole";
 import {MenuProvider} from './Controls/SideMenuProvider'
@@ -26,7 +27,7 @@ function App() {
           {/* <Route Component={Login} path="/" />
           <Route Component={HomePage} path="/homepage" />
           <Route Component={Chatbox} path="/chatbox" /> */}
-          <Route path="/" element={<Test/>} />
+          <Route path="/" element={<News/>} />
           <Route path="/createacc" element={<Test/>} />
           <Route path="/manageacc" element={<Test/>} />
           <Route path="/createrole" element={<CreateRole/>} />
