@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {db} from '../Models/firebase/config'
-import { getDocs, collection, query, where, orderBy } from 'firebase/firestore'
+import { getDocs, collection, query, where } from 'firebase/firestore'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faUsers, faUserGear, faUsersGear, faNewspaper } from '@fortawesome/free-solid-svg-icons';
 
 const SideMenuController = () => {
-  const key = 'ad'
+  const key = '4nyDFcYo2Ulai5BMKc39'
 
   const q = query(collection(db, "RoleFunction"), where("role", "==", key));
   const colRef = collection(db, "Functions");
@@ -67,7 +67,7 @@ const SideMenuController = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
+  
   // trả về mảng được sort theo số thứ tự xuất hiện
   return rolefunctions.sort((a, b) => a.stt - b.stt);
 };
