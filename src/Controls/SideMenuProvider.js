@@ -1,34 +1,38 @@
-import React from 'react';
-import { MenuContext } from '../Views/components/Context/MenuContext';
+
+
+import React, { createContext, useState, useEffect } from 'react';
 import SideMenuController from './SideMenuController';
 
-export const MenuProvider = ({ children }) => {
-  // const items = [
-  //   {
-  //     label: 'News',
-  //     link: '/',
-  //   },
-  //   {
-  //     label: 'Create Account',
-  //     link: '/createacc',
-  //   },
-  //   {
-  //     label: 'Manage Account',
-  //     link: '/manageacc',
-  //   },
-  //   {
-  //     label: 'Create Role',
-  //     link: '/createrole',
-  //   },
-  //   {
-  //     label: 'Manage Role',
-  //     link: '/managerole',
-  //   },
-  // ]
+export const MenuContext = createContext({
+  items: [],
+  roleID: '',
+});
 
-    const items = SideMenuController()
+export const MenuProvider = ({ children }) => {
+  const [roleID, setRoleID] = useState('');
+
+  const updateRoleID = (id) => {
+    setRoleID(id);
+    localStorage.setItem('roleID', id); // Lưu giá trị roleID vào localStorage
+  };
+
+  const items = SideMenuController(roleID);
+
+  useEffect(() => {
+    // Kiểm tra nếu đã có giá trị roleID trong localStorage, khôi phục nó
+    const savedRoleID = localStorage.getItem('roleID');
+    if (savedRoleID) {
+      setRoleID(savedRoleID);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Mỗi khi roleID thay đổi, lưu giá trị mới vào localStorage
+    localStorage.setItem('roleID', roleID);
+  }, [roleID]);
+
   return (
-    <MenuContext.Provider value={items}>
+    <MenuContext.Provider value={{ items, roleID, updateRoleID }}>
       {children}
     </MenuContext.Provider>
   );
