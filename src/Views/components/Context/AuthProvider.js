@@ -10,6 +10,8 @@ export default function AuthProvider({ children }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   React.useEffect(() => {
     const unsubscribed = auth.onAuthStateChanged((user) => {
@@ -35,7 +37,16 @@ export default function AuthProvider({ children }) {
     };
   }, [navigate]);
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        email,
+        setEmail,
+        password,
+        setPassword,
+      }}
+    >
       {isLoading ? <Spin /> : children}
     </AuthContext.Provider>
   );

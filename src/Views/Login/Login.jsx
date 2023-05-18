@@ -10,14 +10,16 @@ import { useContext } from "react";
 import { AuthContext } from "../components/Context/AuthProvider";
 import { useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
+import CreateAccount from "../components/Admin/CreateAccount/CreateAccount";
 import { MenuContext } from '../../Controls/SideMenuProvider';
 
 const Login = () => {
   const navigate = useNavigate()
   const { isAuthenticated } = useContext(AuthContext)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  // const [email, setEmail] = useState("")
+  // const [password, setPassword] = useState("")
   const [roleArray, setRoleArray] = useState([])
+  const { email, password, setEmail, setPassword } = useContext(AuthContext);
   const { updateRoleID } = useContext(MenuContext);
 
   useEffect(() => {
