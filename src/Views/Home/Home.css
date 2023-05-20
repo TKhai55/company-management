@@ -1,0 +1,34 @@
+*{
+    margin: 0;
+    padding: 0;
+  }
+.Home-container{
+  height: 100%;
+  display: flex;
+  
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.Home-content{
+  width: 95%;
+  background-color: rgb(4, 4, 4);
+  align-items: center;
+}
+.Home-content .img-slider{
+  width: 100%;
+  border-radius: 1vw;
+}
+.carousel-main{
+  z-index: 2;
+  
+}
+.carousel-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(100px); /* Hiệu ứng blur */
+  z-index: 1; /* Đảm bảo layer blur nằm trên Carousel */
+}

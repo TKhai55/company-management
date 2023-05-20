@@ -1,11 +1,11 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Login from "./Views/Login/Login";
-import HomePage from "./Views/components/Test";
+import HomePage from "./Views/Home/Home";
 import AuthProvider from "./Views/components/Context/AuthProvider";
 import Chatbox from "./Views/chat/chatbox";
 import JitsiMeet from "./Views/JitsiMeet";
-import Test from "./Views/components/Test";
+import Test from "./Views/Home/Home";
 import ManageRole from "./Views/ManageRole/ManageRole";
 import CreateRole from "./Views/CreateRole/CreateRole";
 import {MenuProvider} from './Controls/SideMenuProvider'
