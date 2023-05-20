@@ -18,14 +18,14 @@ import { auth, db } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
-import { doc, getDoc } from 'firebase/firestore'
-import { updateProfile } from 'firebase/auth'
+import { doc, getDoc } from "firebase/firestore";
+import { updateProfile } from "firebase/auth";
 
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const Header = () => {
-  const [currentUser, setCurrentUser] = useState({})
+  const [currentUser, setCurrentUser] = useState({});
 
   const [value, setValue] = useState("");
   const { updateRoleID } = useContext(MenuContext);
@@ -35,7 +35,7 @@ const Header = () => {
   const navigate = useNavigate();
   const {
     isAuthenticated,
-    user: { displayName, photoURL, email },
+    user: { uid },
   } = useContext(AuthContext);
 
   const modules = {
@@ -92,16 +92,14 @@ const Header = () => {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setCurrentUser(docSnap.data())
+        setCurrentUser(docSnap.data());
       } else {
-        message.error("The user that you log in is not exist in our system!")
+        message.error("The user that you log in is not exist in our system!");
       }
     }
 
-    getDocuments()
-  }, [])
-
-
+    getDocuments();
+  }, []);
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [confirmEditLoading, setConfirmEditLoading] = useState(false);
@@ -135,7 +133,9 @@ const Header = () => {
 
   const content = (
     <div>
-      <Typography.Text>{currentUser.displayName ? currentUser.displayName : currentUser.email}</Typography.Text>
+      <Typography.Text>
+        {currentUser.displayName ? currentUser.displayName : currentUser.email}
+      </Typography.Text>
       <br />
       <Button
         onClick={() => {
@@ -225,7 +225,18 @@ const Header = () => {
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
         </div>
         <Popover content={content}>
-          <Avatar style={{ backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`}` }} src={currentUser.photoURL}>{currentUser.photoURL ? "" : currentUser.email?.charAt(3)?.toUpperCase()}</Avatar>
+          <Avatar
+            style={{
+              backgroundColor: `${
+                currentUser.photoURL ? "" : `#${randomColor}`
+              }`,
+            }}
+            src={currentUser.photoURL}
+          >
+            {currentUser.photoURL
+              ? ""
+              : currentUser.email?.charAt(3)?.toUpperCase()}
+          </Avatar>
         </Popover>
       </div>
     </div>
