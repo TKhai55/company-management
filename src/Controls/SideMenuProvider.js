@@ -10,11 +10,18 @@ export const MenuContext = createContext({
 
 export const MenuProvider = ({ children }) => {
   const [roleID, setRoleID] = useState('');
+  const [firstLoad, setFirstLoad] = useState(true);
 
   const updateRoleID = (id) => {
     setRoleID(id);
     localStorage.setItem('roleID', id); // Lưu giá trị roleID vào localStorage
   };
+
+  const updateLoad = (load) => {
+    setFirstLoad(load);
+    // localStorage.setItem('roleID', id); // Lưu giá trị roleID vào localStorage
+  };
+
 
   const items = SideMenuController(roleID);
 
@@ -32,7 +39,7 @@ export const MenuProvider = ({ children }) => {
   }, [roleID]);
 
   return (
-    <MenuContext.Provider value={{ items, roleID, updateRoleID }}>
+    <MenuContext.Provider value={{ items, roleID,firstLoad, updateLoad, updateRoleID }}>
       {children}
     </MenuContext.Provider>
   );
