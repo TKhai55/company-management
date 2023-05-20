@@ -15,6 +15,7 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
   const [data, setData] = useState([]);
   const [roleArray, setRoleArray] = useState([])
   const [keyRole, setKeyRole] = useState("")
+  const [selectedRole, setSelectedRole] = useState("")
   const [employeeName, setEmployeeName] = useState("")
   const [employeePassword, setEmployeePassword] = useState("")
   const { email, password } = useContext(AuthContext);
@@ -33,9 +34,9 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
     })()
   }, [])
 
-  roleArray.map((role) => {
+  roleArray.map((role, key) => {
     role.label = role.name
-    role.value = role.key
+    role.value = key
   })
 
   function containsSpecialChars(str) {
@@ -67,21 +68,24 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
     if (containsSpecialChars(employeeName) || containsNumbers(employeeName)) {
       message.error("Employee's name must not contain special characters or numbers.")
     } else {
-      await createUserWithEmailAndPassword(auth, `${keyRole}.${employeeName.split(' ').join('').toLowerCase()}@gmail.com`, employeePassword).then(async userCredential => {
+      await createUserWithEmailAndPassword(auth, `${roleArray[keyRole].key}.${employeeName.split(' ').join('').toLowerCase()}@gmail.com`, employeePassword).then(async userCredential => {
         const user = userCredential.user
         await setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
+          role: roleArray[keyRole].name
         });
-        await signInWithEmailAndPassword(auth, email, password)
-        message.success(`Create account for ${employeeName} successfully!`)
-        setEmployeeName("")
-        setEmployeePassword("")
-        setKeyRole("")
+        await signInWithEmailAndPassword(auth, email, password).then(() => {
+          message.success(`Create account for ${employeeName} successfully!`)
+          setEmployeeName("")
+          setEmployeePassword("")
+          setKeyRole("")
+        })
+
       }).catch(error => {
-        message.error(error.message)
+        message.error(error.message, `${roleArray[keyRole].key}.${employeeName.split(' ').join('').toLowerCase()}@gmail.com`)
       })
     }
   }
@@ -154,7 +158,7 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
             defaultValue="Select role"
             onChange={(key) => setKeyRole(key)}
             options={roleArray}
-            value={keyRole ? keyRole : "Select role"}
+            value={typeof roleArray[keyRole] === "undefined" ? "Select role" : roleArray[keyRole].name}
           />
 
           {

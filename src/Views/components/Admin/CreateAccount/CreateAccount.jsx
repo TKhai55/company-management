@@ -30,7 +30,7 @@ const CreateAccount = () => {
     setTableData(data)
   }
 
-  const addNewUser = async (username, password) => {
+  const addNewUser = async (username, password, role) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, username, password);
       const user = userCredential.user;
@@ -40,6 +40,7 @@ const CreateAccount = () => {
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
+        role: role
       });
 
       message.success(`Create account for ${username} successfully!`)
@@ -86,18 +87,22 @@ const CreateAccount = () => {
         const name = Object.values(data)[nameColumnIndex].split(' ').join('').toLowerCase();
         let username = '';
         let password = `${name}`;
+        let role = ""
 
         if (Object.values(data)[roleColumnIndex].includes('Head Department')) {
           username = `hd.${name}@gmail.com`;
+          role = Object.values(data)[roleColumnIndex]
         } else if (Object.values(data)[roleColumnIndex].includes('Employee')) {
           username = `ep.${name}@gmail.com`;
+          role = Object.values(data)[roleColumnIndex]
         } else if (Object.values(data)[roleColumnIndex].includes('Board of Directors')) {
           username = `bd.${name}@gmail.com`;
+          role = Object.values(data)[roleColumnIndex]
         }
 
-        await addNewUser(username, password);
+        await addNewUser(username, password, role);
       }
-      signInWithEmailAndPassword(auth, email, password)
+      await signInWithEmailAndPassword(auth, email, password)
     }
     else {
       setCurrent(current + 1)
