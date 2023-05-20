@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import "./Header.css";
 import logo from "../../../images/main logo.png";
 import { BsCameraVideo, BsChatDots } from "react-icons/bs";
@@ -14,16 +14,29 @@ import {
   Typography,
   message,
 } from "antd";
-import { auth } from "../../../Models/firebase/config";
+import { auth, db } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
+import { doc, getDoc } from 'firebase/firestore'
+import { updateProfile } from 'firebase/auth'
 
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const Header = () => {
+  const [currentUser, setCurrentUser] = useState({})
+
   const [value, setValue] = useState("");
+  const { updateRoleID } = useContext(MenuContext);
+  const { updateLoad } = useContext(MenuContext);
+
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  const navigate = useNavigate();
+  const {
+    isAuthenticated,
+    user: { displayName, photoURL, email },
+  } = useContext(AuthContext);
 
   const modules = {
     toolbar: [
@@ -67,20 +80,28 @@ const Header = () => {
     setValue(value);
   };
 
-  const { updateRoleID } = useContext(MenuContext);
-  const { updateLoad } = useContext(MenuContext);
-
-  const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-  const navigate = useNavigate();
-  const {
-    isAuthenticated,
-    user: { displayName, photoURL, email },
-  } = useContext(AuthContext);
   const handleClickChatBox = () => {
     if (isAuthenticated) {
       navigate("/chatbox");
     }
   };
+
+  useEffect(() => {
+    async function getDocuments() {
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setCurrentUser(docSnap.data())
+      } else {
+        message.error("The user that you log in is not exist in our system!")
+      }
+    }
+
+    getDocuments()
+  }, [])
+
+
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [confirmEditLoading, setConfirmEditLoading] = useState(false);
@@ -114,7 +135,7 @@ const Header = () => {
 
   const content = (
     <div>
-      <Typography.Text>{displayName ? displayName : email}</Typography.Text>
+      <Typography.Text>{currentUser.displayName ? currentUser.displayName : currentUser.email}</Typography.Text>
       <br />
       <Button
         onClick={() => {
@@ -204,9 +225,7 @@ const Header = () => {
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
         </div>
         <Popover content={content}>
-          <Avatar style={{ backgroundColor: `#${randomColor}` }} src={photoURL}>
-            {photoURL ? "" : email?.charAt(3)?.toUpperCase()}
-          </Avatar>
+          <Avatar style={{ backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`}` }} src={currentUser.photoURL}>{currentUser.photoURL ? "" : currentUser.email?.charAt(3)?.toUpperCase()}</Avatar>
         </Popover>
       </div>
     </div>
