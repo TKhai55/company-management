@@ -1,60 +1,38 @@
 import React, { useEffect, useRef, useState } from "react";
 import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
+import "./ManageDepartment.css";
 import {
-  GetFunctionData,
-  AddMnRoleData,
-  DeleteMnRoleData,
-  EditMnRoleData,
-} from "../../Controls/ManageRoleController";
-import CreateRoleController from "../../Controls/CreateRoleController";
-import {
-  Table,
-  Space,
-  Form,
-  Button,
-  InputNumber,
-  Input,
-  message,
-  Select,
-} from "antd";
+  GetUserData,
+  AddDepartmentData,
+  DeleteDepartmentData,
+  EditDepartmentData,
+} from "../../Controls/CreateDepartmentController";
+import { Table, Space, Form, Button, Input, message, Select } from "antd";
 import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
 import { getDocs, collection } from "firebase/firestore";
-import "./ManageRole.css";
-import { MenuProvider } from "../../Controls/SideMenuProvider";
 
-function ManageRole() {
+function ManageDepartment() {
   const columns = [
     {
-      title: (
-        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Role Name</span>
-      ),
+      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Name</span>,
       dataIndex: "name",
       key: "name",
       align: "center",
-      sorter: (a, b) => a.role.localeCompare(b.name),
-    },
-    {
-      title: (
-        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Function</span>
-      ),
-      dataIndex: "function",
-      key: "function",
-      align: "center",
-      sorter: (a, b) => a.function.localeCompare(b.key),
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: (
         <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>
-          Numerical Order
+          Leader Mail
         </span>
       ),
-      dataIndex: "stt",
-      key: "stt",
+      dataIndex: "leadermail",
+      key: "leadermail",
       align: "center",
-      sorter: (a, b) => a.stt - b.stt,
+      sorter: (a, b) => a.leadermail.localeCompare(b.key),
     },
     {
       title: (
@@ -87,7 +65,7 @@ function ManageRole() {
     },
   ];
 
-  const colRef = collection(db, "RoleFunction");
+  const colRef = collection(db, "Department");
 
   const fetchData = async () => {
     const querySnapshot = await getDocs(colRef);
@@ -98,15 +76,25 @@ function ManageRole() {
     return data;
   };
 
-  const selectRole = CreateRoleController();
-  const selectFunction = GetFunctionData();
+  const selectUser = GetUserData();
+  const selectUserOptions = [
+    {
+      label: "Tạm trống",
+      value: null,
+    },
+    ...selectUser.map((option) => ({
+      label: option.email,
+      value: option.id,
+    })),
+  ];
   const [formCreateValues, setFormCreateValues] = useState({
-    role: undefined,
-    function: undefined,
+    leader: undefined,
+    leadermail: undefined,
     name: undefined,
-    stt: undefined,
   });
+
   const [tableItems, setTableItems] = useState([]);
+  // let tableItems = []
   const [searchText, setSearchText] = useState("");
   const [recordId, setrecordID] = useState("");
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -127,9 +115,8 @@ function ManageRole() {
 
   const filteredItems = tableItems.filter(
     (item) =>
-      item.function.toLowerCase().includes(searchText.toLowerCase()) ||
       item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.stt.toString().includes(searchText)
+      item.leadermail.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleEditCancel = () => {
@@ -139,17 +126,29 @@ function ManageRole() {
 
   const handleEditOk = () => {
     form.validateFields().then((values) => {
-      if (!values.stt) {
+      if (!values.leader) {
         message.error("Please full filled data");
         return; // Ngăn không cho việc xử lý tiếp tục
       }
       setConfirmEditLoading(true);
       setTimeout(async () => {
-        const formValues = formRef.current.getFieldValue("stt");
-        await EditMnRoleData(recordId, formValues);
-        getData();
-        message.success("Edit successfully!");
-        formRef.current.resetFields();
+        const formValues = formRef.current.getFieldValue("leader");
+        // console.log("1", recordId);
+        // console.log("2", formValues.value);
+        const documentId = await EditDepartmentData(
+          recordId,
+          formValues.value,
+          formValues.label
+        );
+        console.log(documentId);
+        if (documentId !== false) {
+          getData();
+          message.success("Edit successfully!");
+          formRef.current.resetFields();
+        } else {
+          formRef.current.resetFields();
+          message.error(`Can not assign 2 department for 1 leader`);
+        }
         setIsEditModalVisible(false);
         setConfirmEditLoading(false);
       }, 1000);
@@ -163,18 +162,23 @@ function ManageRole() {
 
   const handleCreateOk = () => {
     form.validateFields().then((values) => {
-      if (!values.role || !values.function || !values.stt) {
+      if (!values.name || !values.leader) {
         message.error("Please full filled data");
         return; // Ngăn không cho việc xử lý tiếp tục
       }
+
+      // Xử lý tiếp tục khi đã có nội dung trong input
       setConfirmCreateLoading(true);
       setTimeout(async () => {
-        const documentId = await AddMnRoleData(formCreateValues);
+        const documentId = await AddDepartmentData(formCreateValues);
         if (documentId) {
-          message.success("Assign successfully!");
+          message.success(`Create ${formCreateValues.name} successfully!`);
           formRef.current.resetFields();
           console.log("Data saved successfully");
           getData();
+        } else {
+          formRef.current.resetFields();
+          message.error(`Can not assign 2 department for 1 leader`);
         }
         setIsCreateModalVisible(false);
         setConfirmCreateLoading(false);
@@ -185,7 +189,7 @@ function ManageRole() {
   const handleDeleteOk = () => {
     setConfirmDeleteLoading(true);
     setTimeout(async () => {
-      await DeleteMnRoleData(recordId);
+      await DeleteDepartmentData(recordId);
       message.success("Delete successfully!");
       getData();
       setIsDeleteModalVisible(false);
@@ -213,7 +217,7 @@ function ManageRole() {
       <div className="App-Content-container">
         <SideMenu />
         <div className="App-Content-Main">
-          <div className="ManageRole-container">
+          <div className="ManageDepartment-container">
             <div className="role-create">
               <Input.Search
                 className="role-create-search"
@@ -225,14 +229,12 @@ function ManageRole() {
               />
               <Button
                 id="role-btn-create"
-                onClick={() => {
-                  setIsCreateModalVisible(true);
-                }}
+                onClick={() => setIsCreateModalVisible(true)}
               >
-                Assign Function
+                Create Role
               </Button>
               <CustomModal
-                title="Assign function for role"
+                title="Create new department"
                 open={isCreateModalVisible}
                 onCancel={handleCreateCancel}
                 confirmLoading={confirmCreateLoading}
@@ -240,57 +242,36 @@ function ManageRole() {
               >
                 <Form form={form} ref={formRef}>
                   <Form.Item
-                    label="Role"
+                    label="Name"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 18 }}
-                    name="role"
+                    name="name"
                     required
                     tooltip="This is a required field"
                   >
-                    <Select
-                      options={selectRole.map((option) => ({
-                        label: option.name,
-                        value: option.id,
-                      }))}
-                      defaultValue="Chose role"
-                      labelInValue
-                      onChange={(value) => {
-                        handleSelectChange("role", value.value);
-                        handleSelectChange("name", value.label);
-                      }}
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label="Function"
-                    name="function"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 18 }}
-                    required
-                    tooltip="This is a required field"
-                  >
-                    <Select
-                      options={selectFunction.map((option) => ({
-                        label: option.label,
-                        value: option.label,
-                      }))}
-                      defaultValue="Chose function"
-                      labelInValue
+                    <Input
+                      placeholder="Department name"
                       onChange={(value) =>
-                        handleSelectChange("function", value.label)
+                        handleSelectChange("name", value.target.value)
                       }
                     />
                   </Form.Item>
                   <Form.Item
-                    label="STT"
-                    name="stt"
+                    label="Leader"
+                    name="leader"
                     labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 18 }}
                     required
                     tooltip="This is a required field"
                   >
-                    <InputNumber
-                      placeholder="STT"
-                      type="number"
-                      onChange={(value) => handleSelectChange("stt", value)}
+                    <Select
+                      options={selectUserOptions}
+                      defaultValue="Chose leader"
+                      labelInValue
+                      onChange={(value) => {
+                        handleSelectChange("leader", value.value);
+                        handleSelectChange("leadermail", value.label);
+                      }}
                     />
                   </Form.Item>
                 </Form>
@@ -304,13 +285,18 @@ function ManageRole() {
               >
                 <Form form={form} ref={formRef}>
                   <Form.Item
-                    label="STT"
-                    name="stt"
+                    label="Leader"
+                    name="leader"
                     labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 18 }}
                     required
                     tooltip="This is a required field"
                   >
-                    <InputNumber placeholder="STT" type="number" />
+                    <Select
+                      options={selectUserOptions}
+                      defaultValue="Chose leader"
+                      labelInValue
+                    />
                   </Form.Item>
                 </Form>
               </CustomModal>
@@ -336,4 +322,4 @@ function ManageRole() {
   );
 }
 
-export default ManageRole;
+export default ManageDepartment;
