@@ -13,13 +13,17 @@ import {
   Modal,
   Typography,
   message,
+  Radio,
+  Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { auth, db } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
 import { doc, getDoc } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
+import { uploadToFirestore } from "../../../Controls/NewsController";
 
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -76,9 +80,9 @@ const Header = () => {
     "image",
     "video",
   ];
-  const handleEditorChange = (value) => {
-    setValue(value);
-  };
+  // const handleEditorChange = (value) => {
+  //   setValue(value);
+  // };
 
   const handleClickChatBox = () => {
     if (isAuthenticated) {
@@ -101,30 +105,78 @@ const Header = () => {
     getDocuments();
   }, []);
 
+  const [title, setTitle] = useState("");
+  const [postcontent, setPostContent] = useState("");
+  const [scope, setScope] = useState("public");
+  const [file, setFile] = useState(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [confirmEditLoading, setConfirmEditLoading] = useState(false);
   const [form] = Form.useForm();
   const formRef = useRef(null);
 
-  const handleCancel = () => {
-    setIsEditModalVisible(false);
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+
+  const handleEditorChange = (value) => {
+    setPostContent(value);
+  };
+
+  const handleScopeChange = (e) => {
+    setScope(e.target.value);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFile(file);
   };
 
   const handleOk = () => {
     form.validateFields().then((values) => {
-      if (!values.title || !values.content) {
-        message.error("Please full filled data");
-        return; // Ngăn không cho việc xử lý tiếp tục
+      if (!title || !content) {
+        message.error("Please fill in all required fields");
+        return;
       }
 
-      // Xử lý tiếp tục khi đã có nội dung trong input
       setConfirmEditLoading(true);
+
+      // Gọi hàm uploadToFirestore để tải lên Firestore
       setTimeout(() => {
-        setIsEditModalVisible(false);
-        setConfirmEditLoading(false);
-        handleReset();
+        uploadToFirestore(title, postcontent, scope, file, currentUser.uid)
+          .then(() => {
+            setFile(null);
+            message.success("Post create!");
+            setIsEditModalVisible(false);
+            setConfirmEditLoading(false);
+            handleReset();
+          })
+          .catch((error) => {
+            message.error("Error uploading to Firestore");
+            console.error(error);
+            setConfirmEditLoading(false);
+          });
       }, 1000);
     });
+  };
+
+  // const handleOk = () => {
+  //   form.validateFields().then((values) => {
+  //     if (!values.title || !values.content) {
+  //       message.error("Please full filled data");
+  //       return; // Ngăn không cho việc xử lý tiếp tục
+  //     }
+
+  //     // Xử lý tiếp tục khi đã có nội dung trong input
+  //     setConfirmEditLoading(true);
+  //     setTimeout(() => {
+  //       setIsEditModalVisible(false);
+  //       setConfirmEditLoading(false);
+  //       handleReset();
+  //     }, 1000);
+  //   });
+  // };
+  const handleCancel = () => {
+    setIsEditModalVisible(false);
   };
 
   const handleReset = () => {
@@ -163,6 +215,7 @@ const Header = () => {
             className="icon-btn"
             onClick={() => {
               setIsEditModalVisible(true);
+              console.log(currentUser.department);
             }}
           />
           <Modal
@@ -198,7 +251,7 @@ const Header = () => {
                 labelCol={{ span: 3 }}
                 wrapperCol={{ span: 20 }}
               >
-                <Input placeholder="Enter here" />
+                <Input placeholder="Enter here" onChange={handleTitleChange} />
               </Form.Item>
               <Form.Item
                 label="Post content"
@@ -209,17 +262,46 @@ const Header = () => {
                 wrapperCol={{ span: 20 }}
               >
                 <ReactQuill
-                  value={value}
+                  value={postcontent}
                   onChange={handleEditorChange}
                   modules={modules}
                   formats={formats}
                 />
               </Form.Item>
+              <Form.Item
+                label="Scope"
+                name="scope"
+                required
+                tooltip="This is a required field"
+                labelCol={{ span: 3 }}
+                wrapperCol={{ span: 20 }}
+                initialValue="public"
+              >
+                <Radio.Group onChange={handleScopeChange}>
+                  <Radio value={"public"}>Public</Radio>
+                  {currentUser.department && (
+                    <Radio value={currentUser.department}>Private</Radio>
+                  )}
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item
+                label="File upload"
+                name="file"
+                labelCol={{ span: 3 }}
+                wrapperCol={{ span: 20 }}
+              >
+                <input type="file" onChange={handleFileChange} />
+              </Form.Item>
             </Form>
           </Modal>
         </div>
         <div className="icon-btn-container">
-          <BsCameraVideo className="icon-btn" />
+          <BsCameraVideo
+            className="icon-btn"
+            onClick={() => {
+              window.open("/video", "_blank");
+            }}
+          />
         </div>
         <div className="icon-btn-container">
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />

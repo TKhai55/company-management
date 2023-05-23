@@ -1,46 +1,62 @@
-import { EyeInvisibleOutlined, EyeTwoTone, InfoCircleFilled, UserOutlined } from '@ant-design/icons';
-import { Button, Col, Collapse, Input, message, Row, Select, Tooltip } from 'antd'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
-import React from 'react'
-import { useEffect } from 'react';
-import { useContext } from 'react';
-import { useState } from 'react';
+import {
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+  InfoCircleFilled,
+  UserOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Col,
+  Collapse,
+  Input,
+  message,
+  Row,
+  Select,
+  Tooltip,
+} from "antd";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import React from "react";
+import { useEffect } from "react";
+import { useContext } from "react";
+import { useState } from "react";
 import * as XLSX from "xlsx";
-import { auth, db } from '../../../../Models/firebase/config';
-import { AuthContext } from '../../Context/AuthProvider';
+import { auth, db } from "../../../../Models/firebase/config";
+import { AuthContext } from "../../Context/AuthProvider";
 
 export default function Step1({ onDataUpload, handleIsFileUploaded }) {
-
   const [data, setData] = useState([]);
-  const [roleArray, setRoleArray] = useState([])
-  const [keyRole, setKeyRole] = useState("")
-  const [employeeName, setEmployeeName] = useState("")
-  const [employeePassword, setEmployeePassword] = useState("")
+  const [roleArray, setRoleArray] = useState([]);
+  const [keyRole, setKeyRole] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [employeeName, setEmployeeName] = useState("");
+  const [employeePassword, setEmployeePassword] = useState("");
   const { email, password } = useContext(AuthContext);
 
   useEffect(() => {
-    ; (async () => {
-      const collectionRef = collection(db, "Role")
-      const snapshots = await getDocs(collectionRef)
+    (async () => {
+      const collectionRef = collection(db, "Role");
+      const snapshots = await getDocs(collectionRef);
       const docs = snapshots.docs.map((doc) => {
-        const data = doc.data()
-        data.id = doc.id
+        const data = doc.data();
+        data.id = doc.id;
 
-        return data
-      })
-      setRoleArray(docs)
-    })()
-  }, [])
+        return data;
+      });
+      setRoleArray(docs);
+    })();
+  }, []);
 
   roleArray.map((role, key) => {
-    role.label = role.name
-    role.value = key
-  })
+    role.label = role.name;
+    role.value = key;
+  });
 
   function containsSpecialChars(str) {
-    const specialChars =
-      /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
     return specialChars.test(str);
   }
 
@@ -58,46 +74,62 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
       const sheet = workbook.Sheets[sheetName];
       const parsedData = XLSX.utils.sheet_to_json(sheet);
       setData(parsedData);
-      onDataUpload(parsedData)
-      handleIsFileUploaded(true)
+      onDataUpload(parsedData);
+      handleIsFileUploaded(true);
     };
   };
 
   const handleClickNext = async () => {
     if (containsSpecialChars(employeeName) || containsNumbers(employeeName)) {
-      message.error("Employee's name must not contain special characters or numbers.")
+      message.error(
+        "Employee's name must not contain special characters or numbers."
+      );
     } else {
-      await createUserWithEmailAndPassword(auth, `${roleArray[keyRole].key}.${employeeName.split(' ').join('').toLowerCase()}@gmail.com`, employeePassword).then(async userCredential => {
-        const user = userCredential.user
-        await setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          role: roleArray[keyRole].name,
-          isActive: true
-        });
-        await signInWithEmailAndPassword(auth, email, password).then(() => {
-          message.success(`Create account for ${employeeName} successfully!`)
-          setEmployeeName("")
-          setEmployeePassword("")
-          setKeyRole("")
+      await createUserWithEmailAndPassword(
+        auth,
+        `${roleArray[keyRole].key}.${employeeName
+          .split(" ")
+          .join("")
+          .toLowerCase()}@gmail.com`,
+        employeePassword
+      )
+        .then(async (userCredential) => {
+          const user = userCredential.user;
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            role: roleArray[keyRole].name,
+            isActive: true,
+            department: null,
+          });
+          await signInWithEmailAndPassword(auth, email, password).then(() => {
+            message.success(`Create account for ${employeeName} successfully!`);
+            setEmployeeName("");
+            setEmployeePassword("");
+            setKeyRole("");
+          });
         })
-
-      }).catch(error => {
-        message.error(error.message, `${roleArray[keyRole].key}.${employeeName.split(' ').join('').toLowerCase()}@gmail.com`)
-      })
+        .catch((error) => {
+          message.error(
+            error.message,
+            `${roleArray[keyRole].key}.${employeeName
+              .split(" ")
+              .join("")
+              .toLowerCase()}@gmail.com`
+          );
+        });
     }
-  }
+  };
 
   function isEmpty(string) {
-    return typeof string === 'string' && string.length === 0;
+    return typeof string === "string" && string.length === 0;
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
-
-      <Button type='dashed' style={{ height: "fit-content" }}>
+      <Button type="dashed" style={{ height: "fit-content" }}>
         <input
           style={{ cursor: "pointer" }}
           type="file"
@@ -107,7 +139,17 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
       </Button>
 
       {data.length > 0 && (
-        <table style={{ lineHeight: "100%", color: "black", border: "1px solid black", borderCollapse: "collapse", marginTop: "20px", lineHeight: "30px" }} className="table">
+        <table
+          style={{
+            lineHeight: "100%",
+            color: "black",
+            border: "1px solid black",
+            borderCollapse: "collapse",
+            marginTop: "20px",
+            lineHeight: "30px",
+          }}
+          className="table"
+        >
           <thead>
             <tr>
               {Object.keys(data[0]).map((key) => (
@@ -123,7 +165,9 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
             {data.map((row, index) => (
               <tr key={index}>
                 {Object.values(row).map((value, index) => (
-                  <td style={{ border: "1px solid black" }} key={index}>{value}</td>
+                  <td style={{ border: "1px solid black" }} key={index}>
+                    {value}
+                  </td>
                 ))}
               </tr>
             ))}
@@ -131,10 +175,23 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
         </table>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-evenly", flexDirection: "row", alignItems: "center", marginBottom: "20px", marginTop: "20px" }}>
-        <div style={{ width: "30%", height: "1px", backgroundColor: "gray" }}></div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-evenly",
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: "20px",
+          marginTop: "20px",
+        }}
+      >
+        <div
+          style={{ width: "30%", height: "1px", backgroundColor: "gray" }}
+        ></div>
         <p>Or</p>
-        <div style={{ width: "30%", height: "1px", backgroundColor: "gray" }}></div>
+        <div
+          style={{ width: "30%", height: "1px", backgroundColor: "gray" }}
+        ></div>
       </div>
 
       <Row>
@@ -144,7 +201,7 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
             prefix={<UserOutlined className="site-form-item-icon" />}
             suffix={
               <Tooltip title="Employee's name does not contain special characters and numbers.">
-                <InfoCircleFilled style={{ color: 'rgba(0,0,0,.45)' }} />
+                <InfoCircleFilled style={{ color: "rgba(0,0,0,.45)" }} />
               </Tooltip>
             }
             onChange={(e) => setEmployeeName(e.target.value)}
@@ -158,28 +215,37 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
             defaultValue="Select role"
             onChange={(key) => setKeyRole(key)}
             options={roleArray}
-            value={typeof roleArray[keyRole] === "undefined" ? "Select role" : roleArray[keyRole].name}
+            value={
+              typeof roleArray[keyRole] === "undefined"
+                ? "Select role"
+                : roleArray[keyRole].name
+            }
           />
 
-          {
-            !isEmpty(employeeName) && !isEmpty(employeePassword) && !isEmpty(keyRole) && (
-              <Button onClick={handleClickNext} type='primary' style={{ marginTop: "30px" }}>Create account</Button>
-            )
-          }
+          {!isEmpty(employeeName) &&
+            !isEmpty(employeePassword) &&
+            !isEmpty(keyRole) && (
+              <Button
+                onClick={handleClickNext}
+                type="primary"
+                style={{ marginTop: "30px" }}
+              >
+                Create account
+              </Button>
+            )}
         </Col>
 
         <Col span={8}>
           <Input.Password
             placeholder="Enter employee's password"
-            iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+            iconRender={(visible) =>
+              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+            }
             onChange={(e) => setEmployeePassword(e.target.value)}
             value={employeePassword}
           />
         </Col>
       </Row>
-
-
     </div>
-  )
+  );
 }
-
