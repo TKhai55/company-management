@@ -47,7 +47,7 @@ const CreateAccount = () => {
         displayName: user.displayName,
         photoURL: user.photoURL,
         role: role,
-        isActive: true
+        isActive: true,
         department: null,
       });
 
@@ -106,7 +106,7 @@ const CreateAccount = () => {
       setCurrent(current + 1);
       for (const data of tableData) {
         const name = Object.values(data)
-          [nameColumnIndex].split(" ")
+        [nameColumnIndex].split(" ")
           .join("")
           .toLowerCase();
         let username = "";
