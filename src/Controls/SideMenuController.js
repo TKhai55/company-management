@@ -1,19 +1,20 @@
-
-import React, { useState, useEffect } from 'react';
-import { db } from '../Models/firebase/config';
-import { getDocs, collection, query, where } from 'firebase/firestore';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState, useEffect } from "react";
+import { db } from "../Models/firebase/config";
+import { getDocs, collection, query, where } from "firebase/firestore";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
   faUsers,
   faUserGear,
   faUsersGear,
   faNewspaper,
-} from '@fortawesome/free-solid-svg-icons';
+  faBuildingUser,
+  faUsersBetweenLines,
+} from "@fortawesome/free-solid-svg-icons";
 
 const SideMenuController = (roleID) => {
-  const q = query(collection(db, 'RoleFunction'), where('role', '==', roleID));
-  const colRef = collection(db, 'Functions');
+  const q = query(collection(db, "RoleFunction"), where("role", "==", roleID));
+  const colRef = collection(db, "Functions");
   const [rolefunctions, setRoleFunctions] = useState([]);
   const fetchData = async () => {
     try {
@@ -36,7 +37,7 @@ const SideMenuController = (roleID) => {
       combinationArray(rolefunctionsData, functionsData);
       setRoleFunctions(rolefunctionsData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
   };
 
@@ -66,11 +67,15 @@ const SideMenuController = (roleID) => {
   };
 
   const getIconByLabel = (label) => {
-    if (label === 'News') return <FontAwesomeIcon icon={faNewspaper} />;
-    if (label === 'Create Account') return <FontAwesomeIcon icon={faUser} />;
-    if (label === 'Create Role') return <FontAwesomeIcon icon={faUserGear} />;
-    if (label === 'Manage Account') return <FontAwesomeIcon icon={faUsers} />;
-    if (label === 'Manage Role') return <FontAwesomeIcon icon={faUsersGear} />;
+    if (label === "News") return <FontAwesomeIcon icon={faNewspaper} />;
+    if (label === "Create Account") return <FontAwesomeIcon icon={faUser} />;
+    if (label === "Create Role") return <FontAwesomeIcon icon={faUserGear} />;
+    if (label === "Manage Account") return <FontAwesomeIcon icon={faUsers} />;
+    if (label === "Manage Role") return <FontAwesomeIcon icon={faUsersGear} />;
+    if (label === "Create Department")
+      return <FontAwesomeIcon icon={faBuildingUser} />;
+    if (label === "Manage Department")
+      return <FontAwesomeIcon icon={faUsersBetweenLines} />;
     return null;
   };
 

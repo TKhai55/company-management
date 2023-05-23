@@ -12,6 +12,8 @@ import { MenuProvider } from "./Controls/SideMenuProvider";
 import News from "./Views/News/News";
 import CreateAccount from "./Views/components/Admin/CreateAccount/CreateAccount";
 import ManageAccount from "./Views/components/Admin/ManageAccount/ManageAccount";
+import CreateDepartment from "./Views/Create Department/CreateDepartment";
+import ManageDepartment from "./Views/Manage Department/ManageDepartment";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/manageacc" element={<ManageAccount />} />
           <Route path="/createrole" element={<CreateRole />} />
           <Route path="/managerole" element={<ManageRole />} />
+          <Route path="/createdepartment" element={<CreateDepartment />} />
+          <Route path="/managedepartment" element={<ManageDepartment />} />
           <Route path="/video" element={<JitsiMeet />} />
         </Routes>
       </MenuProvider>
