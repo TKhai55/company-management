@@ -101,6 +101,7 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
             displayName: user.displayName,
             photoURL: user.photoURL,
             role: roleArray[keyRole].name,
+            isActive: true,
             department: null,
           });
           await signInWithEmailAndPassword(auth, email, password).then(() => {

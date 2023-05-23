@@ -47,6 +47,7 @@ const CreateAccount = () => {
         displayName: user.displayName,
         photoURL: user.photoURL,
         role: role,
+        isActive: true
         department: null,
       });
 
