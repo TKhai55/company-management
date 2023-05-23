@@ -227,9 +227,8 @@ const Header = () => {
         <Popover content={content}>
           <Avatar
             style={{
-              backgroundColor: `${
-                currentUser.photoURL ? "" : `#${randomColor}`
-              }`,
+              backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`
+                }`,
             }}
             src={currentUser.photoURL}
           >

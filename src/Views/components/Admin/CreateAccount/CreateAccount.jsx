@@ -40,7 +40,8 @@ const CreateAccount = () => {
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        role: role
+        role: role,
+        isActive: true
       });
 
       message.success(`Create account for ${username} successfully!`)

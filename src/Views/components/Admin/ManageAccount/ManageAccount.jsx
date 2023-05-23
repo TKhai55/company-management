@@ -1,6 +1,6 @@
-import { DeleteOutlined } from '@ant-design/icons'
-import { Button, Input, Space, Switch, Table, Tooltip } from 'antd'
-import { collection, getDocs } from 'firebase/firestore'
+import { DeleteOutlined, ExclamationCircleFilled, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
+import { Button, Input, message, Modal, Space, Switch, Table, Tooltip, Typography } from 'antd'
+import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import React from 'react'
 import { useState } from 'react'
 import { useEffect } from 'react'
@@ -9,15 +9,55 @@ import Header from '../../Header/Header'
 import SideMenu from '../../SideMenu/SideMenu'
 import { GoPrimitiveDot } from "react-icons/go"
 
+const { confirm } = Modal;
+
 export default function ManageAccount() {
 
     const [userArray, setUserArray] = useState([])
     const [searchText, setSearchText] = useState("")
     const [disabled, setDisabled] = useState(true);
-    const [activeStatus, setActiveStatus] = useState(true)
-    const [backgroundColor, setBackgroundColor] = useState("")
+    const [isModalToggleAccountStatusOpen, setIsModalToggleAccountStatusOpen] = useState(false);
+    const [isModalEnterPasswordOpen, setIsModalEnterPasswordOpen] = useState(false)
+    const [accountStatus, setStatusAccount] = useState(true)
+    const [selectedUID, setSelectedUID] = useState("")
+
+    // useEffect(() => {
+    //     const unsub = onSnapshot(doc(db, "users", selectedUID), (doc) => {
+    //         console.log("Current data: ", doc.data());
+    //     });
+
+    //     return () => unsub()
+    // }, selectedUID)
+
+    const showModal = (e) => {
+        setIsModalToggleAccountStatusOpen(true);
+        setStatusAccount(e)
+    };
+    const handleOk = async () => {
+        return new Promise((resolve, reject) => {
+            updateDoc(doc(db, "users", selectedUID), { isActive: accountStatus })
+                .then(() => {
+                    setIsModalToggleAccountStatusOpen(false);
+                    resolve();
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        })
+            .then(() => {
+                message.success("Update successful, the new account status will be shown after the page is reloaded!");
+            })
+            .catch((error) => {
+                message.error("Oops, an error occurred:", error);
+            });
+
+    };
+    const handleCancel = () => {
+        setIsModalToggleAccountStatusOpen(false);
+    };
 
     const toggle = () => {
+        setIsModalEnterPasswordOpen(true)
         setDisabled(!disabled)
     };
 
@@ -34,8 +74,6 @@ export default function ManageAccount() {
             setUserArray(docs)
         })()
     }, [])
-
-    console.log({ userArray })
 
     const filteredItems = userArray.filter(
         (item) =>
@@ -78,16 +116,19 @@ export default function ManageAccount() {
             align: 'center',
             render: (_, record, index) => {
                 return (
-                    <Space direction="vertical">
-                        <Switch disabled={disabled} defaultChecked
-                            onChange={(checked) => {
-                                setActiveStatus(checked)
-                                console.log(record)
-                            }}
-                            style={{
-                                // backgroundColor: `${record[index].isActive ? "green" : "red"}`,
-                            }} />
-                    </Space>
+                    <>
+                        <Space direction="vertical">
+                            <Switch disabled={disabled}
+                                checked={record.isActive ? true : false}
+                                onChange={(e) => {
+                                    showModal(e)
+                                    setSelectedUID(record.uid)
+                                }}
+                                style={{
+                                    backgroundColor: `${record.isActive ? "green" : "red"}`,
+                                }} />
+                        </Space>
+                    </>
                 )
             },
         },
@@ -126,6 +167,19 @@ export default function ManageAccount() {
                                 Change status of account
                             </Button>
                         </div>
+
+                        <Modal title={`Do you sure to ${accountStatus ? "activate" : "deactivate"} this account?`} open={isModalToggleAccountStatusOpen} onOk={handleOk} onCancel={handleCancel} centered>
+                            {`Once you ${accountStatus ? "activate" : "deactivate"}, the user ${accountStatus ? "can" : "can not"} use this email to sign in to the system.`}
+                        </Modal>
+
+                        <Modal open={isModalEnterPasswordOpen} onCancel={() => { setIsModalEnterPasswordOpen(false) }}>
+                            <Typography.Text style={{ marginTop: 30 }}>Enter password to continue.</Typography.Text>
+                            <Input.Password
+                                placeholder="input password"
+                                iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                            />
+                        </Modal>
+
                         <Table columns={columns} dataSource={filteredItems} style={{
                             width: "100%",
                             boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",

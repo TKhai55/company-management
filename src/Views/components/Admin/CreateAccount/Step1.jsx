@@ -15,7 +15,6 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
   const [data, setData] = useState([]);
   const [roleArray, setRoleArray] = useState([])
   const [keyRole, setKeyRole] = useState("")
-  const [selectedRole, setSelectedRole] = useState("")
   const [employeeName, setEmployeeName] = useState("")
   const [employeePassword, setEmployeePassword] = useState("")
   const { email, password } = useContext(AuthContext);
@@ -75,7 +74,8 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
-          role: roleArray[keyRole].name
+          role: roleArray[keyRole].name,
+          isActive: true
         });
         await signInWithEmailAndPassword(auth, email, password).then(() => {
           message.success(`Create account for ${employeeName} successfully!`)
