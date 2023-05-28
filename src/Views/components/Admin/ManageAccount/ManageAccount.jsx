@@ -7,9 +7,8 @@ import { useEffect } from 'react'
 import { db } from '../../../../Models/firebase/config'
 import Header from '../../Header/Header'
 import SideMenu from '../../SideMenu/SideMenu'
-import { GoPrimitiveDot } from "react-icons/go"
-
-const { confirm } = Modal;
+import { AuthContext } from '../../Context/AuthProvider'
+import { useContext } from 'react'
 
 export default function ManageAccount() {
 
@@ -20,6 +19,8 @@ export default function ManageAccount() {
     const [isModalEnterPasswordOpen, setIsModalEnterPasswordOpen] = useState(false)
     const [accountStatus, setStatusAccount] = useState(true)
     const [selectedUID, setSelectedUID] = useState("")
+    const [passwordEntered, setPasswordEntered] = useState("")
+    const { password } = useContext(AuthContext)
 
     // useEffect(() => {
     //     const unsub = onSnapshot(doc(db, "users", selectedUID), (doc) => {
@@ -58,8 +59,18 @@ export default function ManageAccount() {
 
     const toggle = () => {
         setIsModalEnterPasswordOpen(true)
-        setDisabled(!disabled)
+
     };
+
+    const handleEnterPassword = () => {
+        if (passwordEntered.length === 0) message.error("Please enter your password!")
+        else if (passwordEntered.includes(password)) {
+            setPasswordEntered("")
+            setDisabled(!disabled)
+            setIsModalEnterPasswordOpen(false)
+        }
+        else if (!passwordEntered.includes(password)) message.error("Your password is incorrect. \nPlease try again!")
+    }
 
     useEffect(() => {
         ; (async () => {
@@ -172,12 +183,17 @@ export default function ManageAccount() {
                             {`Once you ${accountStatus ? "activate" : "deactivate"}, the user ${accountStatus ? "can" : "can not"} use this email to sign in to the system.`}
                         </Modal>
 
-                        <Modal open={isModalEnterPasswordOpen} onCancel={() => { setIsModalEnterPasswordOpen(false) }}>
-                            <Typography.Text style={{ marginTop: 30 }}>Enter password to continue.</Typography.Text>
-                            <Input.Password
-                                placeholder="input password"
-                                iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
-                            />
+                        <Modal open={isModalEnterPasswordOpen} onCancel={() => { setIsModalEnterPasswordOpen(false) }} onOk={handleEnterPassword}>
+                            <Space style={{ marginTop: 30, display: "flex", flexDirection: "column" }}>
+                                <Typography.Text >Enter password to continue.</Typography.Text>
+                                <Input.Password
+                                    placeholder="input password"
+                                    iconRender={(visible) => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
+                                    style={{ width: "100%" }}
+                                    onChange={(e) => setPasswordEntered(e.target.value)}
+                                    value={passwordEntered}
+                                />
+                            </Space>
                         </Modal>
 
                         <Table columns={columns} dataSource={filteredItems} style={{

@@ -81,7 +81,6 @@ function CreateRole() {
   };
 
   const [tableItems, setTableItems] = useState([]);
-  // let tableItems = []
   const [searchText, setSearchText] = useState("");
   const [recordId, setrecordID] = useState("");
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);

@@ -44,7 +44,7 @@
     line-height: 100%;
 }
 
-.header-btn-container .icon-btn-container:hover {
+.header-btn-container .icon-btn-container:hover, .header-btn-container .icon-btn-notification:hover  {
     cursor: pointer;
     scale: 1.1;
 }

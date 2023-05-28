@@ -15,13 +15,15 @@ import {
   message,
   Radio,
   Upload,
+  Select,
+  Badge,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { BellOutlined, NotificationOutlined, UploadOutlined } from "@ant-design/icons";
 import { auth, db } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
-import { doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, or, query, where } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
 import { uploadToFirestore } from "../../../Controls/NewsController";
 
@@ -34,12 +36,15 @@ const Header = () => {
   const [value, setValue] = useState("");
   const { updateRoleID } = useContext(MenuContext);
   const { updateLoad } = useContext(MenuContext);
-
+  const [optionsColleague, setOptionsColleague] = useState([])
+  let [colleagueGroup, setColleagueGroup] = useState([])
+  const { user: { department } } = useContext(AuthContext)
+  const [newPost, setNewPost] = useState([])
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const navigate = useNavigate();
   const {
     isAuthenticated,
-    user: { uid },
+    user: { uid, email },
   } = useContext(AuthContext);
 
   const modules = {
@@ -90,7 +95,14 @@ const Header = () => {
     }
   };
 
+  function groupBy(xs, f) {
+    if (xs)
+      return Object.entries(xs.reduce((r, v, i, a, k = f(v)) => ((r[k] || (r[k] = [])).push(v), r), {}))
+        .map(([label, options]) => ({ label, options }));
+  }
+
   useEffect(() => {
+    //Xem xét lại
     async function getDocuments() {
       const docRef = doc(db, "users", uid);
       const docSnap = await getDoc(docRef);
@@ -101,9 +113,29 @@ const Header = () => {
         message.error("The user that you log in is not exist in our system!");
       }
     }
-
     getDocuments();
+
+    ; (async () => {
+      const collectionRef = collection(db, "users")
+      const snapshots = await getDocs(collectionRef)
+      const docs = snapshots.docs.map((doc) => {
+        const data = doc.data()
+        data.id = doc.id
+
+        return data
+      })
+      setOptionsColleague(docs)
+    })()
   }, []);
+
+
+  const result = groupBy(optionsColleague, option => option.role)
+  result.forEach((res) => {
+    res.options = res.options.map((option) => ({
+      label: option.displayName || option.email,
+      value: option.uid,
+    }));
+  });
 
   const [title, setTitle] = useState("");
   const [postcontent, setPostContent] = useState("");
@@ -142,13 +174,15 @@ const Header = () => {
 
       // Gọi hàm uploadToFirestore để tải lên Firestore
       setTimeout(() => {
-        uploadToFirestore(title, postcontent, scope, file, currentUser.uid)
+        uploadToFirestore(title, postcontent, scope, file, currentUser.uid, email, colleagueGroup)
           .then(() => {
             setFile(null);
             message.success("Post create!");
             setIsEditModalVisible(false);
             setConfirmEditLoading(false);
             handleReset();
+            setColleagueGroup([])
+            setScope("public")
           })
           .catch((error) => {
             message.error("Error uploading to Firestore");
@@ -200,6 +234,49 @@ const Header = () => {
       </Button>
     </div>
   );
+
+  const handleChange = (value) => {
+    setColleagueGroup(prev => [
+      ...prev,
+      value
+    ])
+  };
+
+  const handleDeselect = (value) => {
+    const index = colleagueGroup.indexOf(value);
+    if (index > -1) {
+      colleagueGroup.splice(index, 1);
+    }
+  }
+
+  useEffect(() => {
+    // Create a Firestore query to fetch posts where the current user is included in the scopeUsers array
+    const q = query(
+      collection(db, "posts"),
+      or(where('scope', '==', "public"),
+        (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
+        (where("scope", "==", department)))
+    );
+
+    // Subscribe to real-time updates for the query
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          const updatedDoc = { id: change.doc.id, ...change.doc.data() };
+          setNewPost(prev => [
+            ...prev,
+            updatedDoc
+          ])
+          console.log("Updated document:", updatedDoc);
+          // Perform any additional logic with the updated document
+        }
+      });
+    });
+
+    // Unsubscribe from the real-time updates when the component unmounts
+    return () => unsubscribe();
+  }, [uid, department]);
+
   return (
     <div className="header-container">
       <img
@@ -215,7 +292,6 @@ const Header = () => {
             className="icon-btn"
             onClick={() => {
               setIsEditModalVisible(true);
-              console.log(currentUser.department);
             }}
           />
           <Modal
@@ -274,7 +350,7 @@ const Header = () => {
                 required
                 tooltip="This is a required field"
                 labelCol={{ span: 3 }}
-                wrapperCol={{ span: 20 }}
+                wrapperCol={{ span: 24 }}
                 initialValue="public"
               >
                 <Radio.Group onChange={handleScopeChange}>
@@ -282,6 +358,20 @@ const Header = () => {
                   {currentUser.department && (
                     <Radio value={currentUser.department}>Private</Radio>
                   )}
+                  <Radio value="custom">
+                    {<Select
+                      mode="multiple"
+                      allowClear
+                      style={{
+                        width: '100%',
+                        overflowX: "visible"
+                      }}
+                      placeholder="Custom Group"
+                      onSelect={handleChange}
+                      options={Object(result)}
+                      onDeselect={handleDeselect}
+                    />}
+                  </Radio>
                 </Radio.Group>
               </Form.Item>
               <Form.Item
@@ -306,6 +396,9 @@ const Header = () => {
         <div className="icon-btn-container">
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
         </div>
+        <Badge className="icon-btn-notification" count={newPost.length} size="default" overflowCount={9} onClick={() => setNewPost([])}>
+          <Avatar shape="circle" size="default">{<BellOutlined style={{ color: "black", fontSize: 18 }} />}</Avatar>
+        </Badge>
         <Popover content={content}>
           <Avatar
             style={{
