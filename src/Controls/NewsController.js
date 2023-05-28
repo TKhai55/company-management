@@ -21,7 +21,15 @@ const GetDepartment = () => {
   return functions;
 };
 
-const uploadToFirestore = async (title, content, scope, file, owner) => {
+const uploadToFirestore = async (
+  title,
+  content,
+  scope,
+  file,
+  owner,
+  emailOwner,
+  customGroup
+) => {
   console.log(title);
   console.log(content);
   console.log(scope);
@@ -36,6 +44,8 @@ const uploadToFirestore = async (title, content, scope, file, owner) => {
       scope,
       file: null,
       owner,
+      emailOwner,
+      customGroup,
       timestamp: timestamp,
     });
     // // Kiểm tra xem người dùng đã chọn một tệp tin hay chưa

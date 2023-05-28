@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import CreateAccount from "../components/Admin/CreateAccount/CreateAccount";
 import { MenuContext } from "../../Controls/SideMenuProvider";
+import { message } from "antd";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -75,8 +76,7 @@ const Login = () => {
       })
       .catch((error) => {
         const errorMessage = error.message;
-
-        console.log({ errorMessage });
+        message.error(errorMessage)
       });
   };
   return (
