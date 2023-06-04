@@ -35,6 +35,19 @@ const uploadToFirestore = async (
   console.log(scope);
   console.log(file);
   try {
+    // // Kiểm tra xem người dùng đã chọn một tệp tin hay chưa
+    // Tạo một tham chiếu đến vị trí lưu trữ trong Firebase Storage
+    let downloadURL = null;
+    if (file) {
+      const storageRef = storage.ref().child(file.name);
+
+      // Tải tệp lên Firebase Storage
+      await storageRef.put(file);
+
+      // Lấy URL của tệp tin đã tải lên
+      downloadURL = await storageRef.getDownloadURL();
+    }
+
     // Tạo một bản ghi mới trong Firestore
     const postsCollectionRef = db.collection("posts");
     const timestamp = firebase.firestore.FieldValue.serverTimestamp();
@@ -42,32 +55,19 @@ const uploadToFirestore = async (
       title,
       content,
       scope,
-      file: null,
+      file: downloadURL,
       owner,
       emailOwner,
       customGroup,
       timestamp: timestamp,
     });
-    // // Kiểm tra xem người dùng đã chọn một tệp tin hay chưa
-    if (file) {
-      // Tạo một tham chiếu đến vị trí lưu trữ trong Firebase Storage
-      const storageRef = storage.ref().child(file.name);
-
-      // Tải tệp lên Firebase Storage
-      await storageRef.put(file);
-
-      // Lấy URL của tệp tin đã tải lên
-      const downloadURL = await storageRef.getDownloadURL();
-
-      // Cập nhật URL của tệp tin trong bản ghi Firestore
-      await updateDoc(postDocRef, { file: downloadURL });
-    }
-
-    // Thành công! Thực hiện các xử lý tiếp theo nếu cần.
 
     console.log("Upload to Firestore successful!");
     console.log("Document written with ID: ", postDocRef.id);
     return postDocRef.id;
+
+    // Cập nhật URL của tệp tin trong bản ghi Firestore
+    // await updateDoc(postDocRef, { file: downloadURL });
   } catch (error) {
     // Xử lý lỗi tải lên Firestore
     console.error("Error uploading to Firestore: ", error);

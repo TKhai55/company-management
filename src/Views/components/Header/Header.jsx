@@ -17,35 +17,157 @@ import {
   Upload,
   Select,
   Badge,
+  Dropdown,
+  Tooltip,
+  DatePicker,
 } from "antd";
-import { BellOutlined, NotificationOutlined, UploadOutlined } from "@ant-design/icons";
-import { auth, db } from "../../../Models/firebase/config";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined } from "@ant-design/icons";
+import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
-import { collection, doc, getDoc, getDocs, onSnapshot, or, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, onSnapshot, or, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
 import { uploadToFirestore } from "../../../Controls/NewsController";
-
+import ImgCrop from 'antd-img-crop';
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import "antd/dist/reset.css"
+import TextArea from "antd/es/input/TextArea";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'
+
+const getBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+
 
 const Header = () => {
   const [currentUser, setCurrentUser] = useState({});
 
-  const [value, setValue] = useState("");
   const { updateRoleID } = useContext(MenuContext);
   const { updateLoad } = useContext(MenuContext);
   const [optionsColleague, setOptionsColleague] = useState([])
   let [colleagueGroup, setColleagueGroup] = useState([])
-  const { user: { department } } = useContext(AuthContext)
   const [newPost, setNewPost] = useState([])
+  const [isModalEditProfileOpen, setIsModalEditProfileOpen] = useState(false);
+  const [formEditProfile] = Form.useForm()
+  const [titleTooltipUID, setTitleTooltipUID] = useState("Copy User ID")
+  const [previewOpenEditAvatar, setPreviewOpenEditAvatar] = useState(false);
+  const [previewEditAvatar, setPreviewEditAvatar] = useState('');
+  const [previewTitleEditAvatar, setPreviewTitleEditAvatar] = useState('');
+  const [departmentName, setDepartmentName] = useState("")
+  const [birthdayString, setBirthdayString] = useState("")
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const navigate = useNavigate();
   const {
     isAuthenticated,
-    user: { uid, email },
+    user: { uid, email, displayName, role, department, photoURL, phoneNumber, location },
   } = useContext(AuthContext);
+  const [editableDisplayName, setEditableDisplayName] = useState(displayName)
+  const [phoneNumberCurrentUser, setPhoneNumberCurrentUser] = useState(phoneNumber)
+  const [currentLocation, setCurrentLocation] = useState(location)
+
+  const showModalEditProfile = () => {
+    setIsModalEditProfileOpen(true);
+  };
+  const handleEditProfileOk = async () => {
+    if (selectedAvatarFile === null) {
+      const currentUserRef = doc(db, "users", uid);
+      await updateDoc(currentUserRef, {
+        phoneNumber: phoneNumberCurrentUser,
+        birthday: birthdayString,
+        location: currentLocation,
+        displayName: editableDisplayName
+      });
+      updateProfile(auth.currentUser, {
+        displayName: editableDisplayName,
+      })
+      setIsModalEditProfileOpen(false);
+      message.success("Update profile successfully!")
+    } else {
+      const avatarRef = ref(storage, `avatar/${uid}`)
+      uploadBytes(avatarRef, selectedAvatarFile).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then(async (url) => {
+          const currentUserRef = doc(db, "users", uid);
+          await updateDoc(currentUserRef, {
+            photoURL: url,
+            phoneNumber: phoneNumberCurrentUser,
+            birthday: birthdayString,
+            location: currentLocation,
+            displayName: editableDisplayName
+          });
+          updateProfile(auth.currentUser, {
+            displayName: editableDisplayName,
+            photoURL: url,
+          })
+          setIsModalEditProfileOpen(false);
+          message.success("Update profile successfully!")
+        })
+      })
+    }
+
+
+
+  };
+  const handleEditProfileCancel = () => {
+    setIsModalEditProfileOpen(false);
+  };
+
+  const beforeUploadAvatar = (_blank, fileList) => {
+    setSelectedAvatarFile(fileList[0])
+    return false;
+  }
+
+  const items = [
+    {
+      key: '1',
+      label: (
+        <Typography.Text strong>
+          {currentUser.displayName ? currentUser.displayName : currentUser.email}
+        </Typography.Text>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <div onClick={showModalEditProfile}>Edit Profile</div>
+      ),
+      icon: <EditOutlined />,
+    },
+    {
+      key: "3",
+      label: (
+        <div
+          onClick={() => navigate("/myposts")}
+        >My Posts</div>
+      ),
+      icon: <SolutionOutlined />
+    },
+    {
+      key: '4',
+      label: (
+        <div
+          onClick={() => {
+            updateRoleID("");
+            updateLoad(true);
+            auth.signOut();
+          }}
+        >
+          Log out
+        </div>
+      ),
+      icon: <LogoutOutlined />
+    },
+  ];
 
   const modules = {
     toolbar: [
@@ -102,18 +224,56 @@ const Header = () => {
   }
 
   useEffect(() => {
-    //Xem xét lại
-    async function getDocuments() {
-      const docRef = doc(db, "users", uid);
+    const q = query(collection(db, "users"), where("uid", "==", uid))
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        setCurrentUser(change.doc.data())
+      })
+    })
+
+    return () => unsubscribe()
+  }, [uid])
+
+  useEffect(() => {
+    const q = query(collection(db, "posts"),
+      or(where('scope', '==', "public"),
+        (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
+        (where("scope", "==", department)),
+        (where("owner", "==", uid))
+      ), orderBy("timestamp", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const updatedNews = [];
+      let news = {}
+
+      snapshot.docChanges().forEach((change) => {
+        const data = change.doc.data();
+        news = { id: change.doc.id, ...data }
+        if (change.type === "modified") {
+          news.isNew = true;
+        }
+        if (news.timestamp) {
+          updatedNews.push(news);
+        }
+      });
+      setNewPost((prevNews) => [...updatedNews, ...prevNews]);
+    });
+    return () => unsubscribe();
+  }, [uid, department])
+
+  useEffect(() => {
+    async function getDepartmentName() {
+      const docRef = doc(db, "Department", department);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setCurrentUser(docSnap.data());
+        setDepartmentName(docSnap.data().name);
       } else {
-        message.error("The user that you log in is not exist in our system!");
+        message.error("Your role has been deleted!");
       }
     }
-    getDocuments();
+    getDepartmentName();
 
     ; (async () => {
       const collectionRef = collection(db, "users")
@@ -218,8 +378,8 @@ const Header = () => {
   };
 
   const content = (
-    <div>
-      <Typography.Text>
+    <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
+      <Typography.Text strong>
         {currentUser.displayName ? currentUser.displayName : currentUser.email}
       </Typography.Text>
       <br />
@@ -249,36 +409,187 @@ const Header = () => {
     }
   }
 
-  useEffect(() => {
-    // Create a Firestore query to fetch posts where the current user is included in the scopeUsers array
-    const q = query(
-      collection(db, "posts"),
-      or(where('scope', '==', "public"),
-        (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
-        (where("scope", "==", department)))
+  const layout = {
+    labelCol: {
+      span: 8,
+    },
+    wrapperCol: {
+      span: 16,
+    },
+  };
+
+  const copyUID = () => {
+    navigator.clipboard.writeText(uid)
+    setTitleTooltipUID("Copied User ID")
+  }
+
+  const uploadButton = (
+    <div>
+      <PlusOutlined />
+      <div
+        style={{
+          marginTop: 8,
+        }}
+      >
+        Upload
+      </div>
+    </div>
+  );
+
+  const [fileList, setFileList] = useState([{
+    uid: '-1',
+    name: 'image.png',
+    status: 'done',
+    url: photoURL,
+  }]);
+
+  const handleCancelEditAvatar = () => setPreviewOpenEditAvatar(false);
+  const handlePreviewEditAvatar = async (file) => {
+    if (!file.url && !file.preview) {
+      file.preview = await getBase64(file.originFileObj);
+    }
+    setPreviewEditAvatar(file.url || file.preview);
+    setPreviewOpenEditAvatar(true);
+    setPreviewTitleEditAvatar(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
+  };
+  const handleChangeEditAvatar = ({ fileList: newFileList, file: newFile }) => {
+    setFileList(newFileList)
+    setSelectedAvatarFile(newFile)
+  };
+
+  const handleBirthdayChange = (_blank, dateString) => {
+    setBirthdayString(dateString)
+  }
+
+  const handleGetCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showLocation, checkError);
+    } else {
+      message.error("The browser does not support geolocation")
+    }
+  }
+
+  const checkError = (error) => {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        message.error("Please allow access to location")
+        break;
+      case error.POSITION_UNAVAILABLE:
+        message.error("Location Information unavailable")
+        break;
+      case error.TIMEOUT:
+        message.error("The request to get user location timed out")
+        break;
+      default:
+        break
+    }
+  };
+
+  const showLocation = async (position) => {
+    let response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
     );
-
-    // Subscribe to real-time updates for the query
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "modified") {
-          const updatedDoc = { id: change.doc.id, ...change.doc.data() };
-          setNewPost(prev => [
-            ...prev,
-            updatedDoc
-          ])
-          console.log("Updated document:", updatedDoc);
-          // Perform any additional logic with the updated document
-        }
-      });
-    });
-
-    // Unsubscribe from the real-time updates when the component unmounts
-    return () => unsubscribe();
-  }, [uid, department]);
+    let data = await response.json();
+    setCurrentLocation(`${data.address.road}, ${data.address.suburb}, ${data.address.city}, ${data.address.country}`)
+  };
 
   return (
     <div className="header-container">
+      <Modal
+        open={previewOpenEditAvatar} title={previewTitleEditAvatar} footer={null} onCancel={handleCancelEditAvatar}
+      >
+        <img
+          alt="Avatar"
+          style={{
+            width: '100%',
+          }}
+          src={previewEditAvatar}
+        />
+      </Modal>
+      <Modal centered title="Edit Profile" open={isModalEditProfileOpen} onOk={handleEditProfileOk} onCancel={handleEditProfileCancel}>
+        <Form
+          {...layout}
+          name="Edit Profile"
+          form={formEditProfile}
+        >
+          <Form.Item wrapperCol={24} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <ImgCrop rotationSlider>
+              <Upload
+                listType="picture-circle"
+                fileList={fileList}
+                onPreview={handlePreviewEditAvatar}
+                onChange={handleChangeEditAvatar}
+                beforeUpload={beforeUploadAvatar}
+                maxCount={1}
+              >
+                {fileList?.length >= 1 ? null : uploadButton}
+              </Upload>
+
+            </ImgCrop>
+          </Form.Item>
+          <Form.Item
+            label="User ID"
+            name="uid"
+          >
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 10 }}>
+              <Input defaultValue={uid} disabled />
+              <Tooltip title={titleTooltipUID}>
+                <Button onClick={copyUID} >{<CopyOutlined />}</Button>
+              </Tooltip>
+            </div>
+          </Form.Item>
+          <Form.Item
+            label="Display name"
+            name="display name"
+          >
+            <Input defaultValue={currentUser.displayName} onChange={e => setEditableDisplayName(e.target.value)} />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+          >
+            <Input defaultValue={currentUser.email} disabled />
+          </Form.Item>
+          <Form.Item
+            label="Role"
+            name="role"
+          >
+            <Input defaultValue={role} disabled />
+          </Form.Item>
+          <Form.Item
+            label="Department"
+            name="department"
+          >
+            <Input defaultValue={departmentName} disabled />
+          </Form.Item>
+          <Form.Item
+            label="Phone Number"
+            name="phoneNumber"
+          >
+            <PhoneInput
+
+              country={'vn'}
+              inputProps={{ value: phoneNumberCurrentUser, style: { width: "100%" } }}
+              onChange={(phone) => setPhoneNumberCurrentUser(phone)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Birthday"
+            name="birthday"
+          >
+            <DatePicker defaultValue={currentUser.birthday ? dayjs(currentUser.birthday, 'DD/MM/YYYY') : ""} style={{ width: "100%" }} format={"DD/MM/YYYY"} onChange={handleBirthdayChange} inputReadOnly />
+          </Form.Item>
+          <Form.Item
+            label="Location"
+            name="location"
+          >
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", alignItems: "center" }}>
+              <TextArea value={currentLocation} autoSize onChange={e => setCurrentLocation(e.target.value)} />
+              <Button onClick={handleGetCurrentLocation}>{<AimOutlined />}</Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
       <img
         src={logo}
         alt="logo"
@@ -399,7 +710,13 @@ const Header = () => {
         <Badge className="icon-btn-notification" count={newPost.length} size="default" overflowCount={9} onClick={() => setNewPost([])}>
           <Avatar shape="circle" size="default">{<BellOutlined style={{ color: "black", fontSize: 18 }} />}</Avatar>
         </Badge>
-        <Popover content={content}>
+        <Dropdown
+          menu={{
+            items,
+          }}
+          placement="bottomRight"
+          arrow
+        >
           <Avatar
             style={{
               backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`
@@ -411,7 +728,7 @@ const Header = () => {
               ? ""
               : currentUser.email?.charAt(3)?.toUpperCase()}
           </Avatar>
-        </Popover>
+        </Dropdown>
       </div>
     </div>
   );

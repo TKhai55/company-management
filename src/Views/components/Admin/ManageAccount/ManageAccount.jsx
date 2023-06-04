@@ -1,6 +1,6 @@
-import { DeleteOutlined, ExclamationCircleFilled, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
-import { Button, Input, message, Modal, Space, Switch, Table, Tooltip, Typography } from 'antd'
-import { collection, doc, getDocs, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons'
+import { Button, Input, message, Modal, Space, Switch, Table, Typography } from 'antd'
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'
 import React from 'react'
 import { useState } from 'react'
 import { useEffect } from 'react'
@@ -21,14 +21,6 @@ export default function ManageAccount() {
     const [selectedUID, setSelectedUID] = useState("")
     const [passwordEntered, setPasswordEntered] = useState("")
     const { password } = useContext(AuthContext)
-
-    // useEffect(() => {
-    //     const unsub = onSnapshot(doc(db, "users", selectedUID), (doc) => {
-    //         console.log("Current data: ", doc.data());
-    //     });
-
-    //     return () => unsub()
-    // }, selectedUID)
 
     const showModal = (e) => {
         setIsModalToggleAccountStatusOpen(true);

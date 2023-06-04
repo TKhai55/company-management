@@ -23,14 +23,25 @@ export default function AuthProvider({ children }) {
           if (doc.exists()) {
             const userData = doc.data();
             if (userData.isActive) {
-              const { displayName, email, uid, photoURL, department } =
-                userData;
+              const {
+                displayName,
+                email,
+                uid,
+                photoURL,
+                department,
+                role,
+                phoneNumber,
+                location,
+              } = userData;
               setUser({
                 displayName,
                 email,
                 uid,
                 photoURL,
                 department,
+                role,
+                phoneNumber,
+                location,
               });
               setIsAuthenticated(true);
               setIsLoading(false);

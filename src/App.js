@@ -14,6 +14,8 @@ import CreateAccount from "./Views/components/Admin/CreateAccount/CreateAccount"
 import ManageAccount from "./Views/components/Admin/ManageAccount/ManageAccount";
 import CreateDepartment from "./Views/Create Department/CreateDepartment";
 import ManageDepartment from "./Views/Manage Department/ManageDepartment";
+import NewsDetails from "./Views/News/NewsDetail/NewsDetails";
+import MyPosts from "./Views/MyPosts/MyPosts";
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Routes>
           <Route element={<Login />} path="/" />
           <Route path="/news" element={<News />} />
+          <Route path="/news/:newsID" element={<NewsDetails />} />
+          <Route path="/myposts" element={<MyPosts />} />
           <Route element={<HomePage />} path="/homepage" />
           <Route element={<Chatbox />} path="/chatbox" />
           <Route path="/createacc" element={<CreateAccount />} />
