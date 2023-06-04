@@ -70,13 +70,20 @@ const Login = () => {
           ) {
             updateRoleID(role.id);
             navigate("/homepage", { state: { role: role.id } });
+          } else if (
+            user.email.startsWith("sm") &&
+            role.key.includes("sm") &&
+            isAuthenticated
+          ) {
+            updateRoleID(role.id);
+            navigate("/homepage", { state: { role: role.id } });
           }
         });
         return;
       })
       .catch((error) => {
         const errorMessage = error.message;
-        message.error(errorMessage)
+        message.error(errorMessage);
       });
   };
   return (

@@ -1,0 +1,33 @@
+.ManageCustomers-container {
+  display: flex;
+  margin-top: 7.5vh;
+  /* align-items: center; */
+  /* justify-content: center; */
+  flex-direction: column;
+}
+.ManageCustomers-container .customer-table {
+  width: 80%;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  border-radius: 10px;
+}
+.ManageCustomers-container .customer-create {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0 3vh 0;
+}
+.ManageCustomers-container .customer-create #customer-btn-create {
+  align-self: flex-start;
+  margin-right: 10%;
+  background-color: rgb(54, 247, 74);
+  color: rgb(255, 255, 255);
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+.ManageCustomers-container .customer-table-container {
+  display: flex;
+  justify-content: center;
+}
+.ManageCustomers-container .customer-create-search {
+  width: 30%;
+  margin-left: 10%;
+  align-self: flex-end;
+}

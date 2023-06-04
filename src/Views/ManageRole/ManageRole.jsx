@@ -252,7 +252,7 @@ function ManageRole() {
                         label: option.name,
                         value: option.id,
                       }))}
-                      defaultValue="Chose role"
+                      defaultValue="Choose role"
                       labelInValue
                       onChange={(value) => {
                         handleSelectChange("role", value.value);
@@ -273,7 +273,7 @@ function ManageRole() {
                         label: option.label,
                         value: option.label,
                       }))}
-                      defaultValue="Chose function"
+                      defaultValue="Choose function"
                       labelInValue
                       onChange={(value) =>
                         handleSelectChange("function", value.label)
