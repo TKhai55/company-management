@@ -5,7 +5,6 @@ import HomePage from "./Views/Home/Home";
 import AuthProvider from "./Views/components/Context/AuthProvider";
 import Chatbox from "./Views/chat/chatbox";
 import JitsiMeet from "./Views/JitsiMeet";
-import Test from "./Views/Home/Home";
 import ManageRole from "./Views/ManageRole/ManageRole";
 import CreateRole from "./Views/CreateRole/CreateRole";
 import { MenuProvider } from "./Controls/SideMenuProvider";
@@ -16,6 +15,10 @@ import CreateDepartment from "./Views/Create Department/CreateDepartment";
 import ManageDepartment from "./Views/Manage Department/ManageDepartment";
 import NewsDetails from "./Views/News/NewsDetail/NewsDetails";
 import MyPosts from "./Views/MyPosts/MyPosts";
+import ManageCustomers from "./Views/Manage Customers/ManageCustomers";
+import ManageStorage from "./Views/Manage Storage/ManageStorage";
+import Test from "./Test";
+import Transaction from "./Views/Transaction/Transaction";
 
 function App() {
   return (
@@ -34,6 +37,9 @@ function App() {
           <Route path="/managerole" element={<ManageRole />} />
           <Route path="/createdepartment" element={<CreateDepartment />} />
           <Route path="/managedepartment" element={<ManageDepartment />} />
+          <Route path="/managecustomers" element={<ManageCustomers />} />
+          <Route path="/managestorage" element={<ManageStorage />} />
+          <Route path="/transaction" element={<Transaction />} />
           <Route path="/video" element={<JitsiMeet />} />
         </Routes>
       </MenuProvider>

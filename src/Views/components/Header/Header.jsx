@@ -21,7 +21,7 @@ import {
   Tooltip,
   DatePicker,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, NotificationOutlined, UploadOutlined, } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
@@ -66,6 +66,9 @@ const Header = () => {
   const [departmentName, setDepartmentName] = useState("")
   const [birthdayString, setBirthdayString] = useState("")
   const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
+  const {
+    user: { uid, email, displayName, role, department, photoURL, phoneNumber, location },
+  } = useContext(AuthContext);
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const navigate = useNavigate();
   const {
@@ -219,8 +222,12 @@ const Header = () => {
 
   function groupBy(xs, f) {
     if (xs)
-      return Object.entries(xs.reduce((r, v, i, a, k = f(v)) => ((r[k] || (r[k] = [])).push(v), r), {}))
-        .map(([label, options]) => ({ label, options }));
+      return Object.entries(
+        xs.reduce(
+          (r, v, i, a, k = f(v)) => ((r[k] || (r[k] = [])).push(v), r),
+          {}
+        )
+      ).map(([label, options]) => ({ label, options }));
   }
 
   useEffect(() => {
@@ -275,21 +282,20 @@ const Header = () => {
     }
     getDepartmentName();
 
-    ; (async () => {
-      const collectionRef = collection(db, "users")
-      const snapshots = await getDocs(collectionRef)
+    (async () => {
+      const collectionRef = collection(db, "users");
+      const snapshots = await getDocs(collectionRef);
       const docs = snapshots.docs.map((doc) => {
-        const data = doc.data()
-        data.id = doc.id
+        const data = doc.data();
+        data.id = doc.id;
 
-        return data
-      })
-      setOptionsColleague(docs)
-    })()
+        return data;
+      });
+      setOptionsColleague(docs);
+    })();
   }, []);
 
-
-  const result = groupBy(optionsColleague, option => option.role)
+  const result = groupBy(optionsColleague, (option) => option.role);
   result.forEach((res) => {
     res.options = res.options.map((option) => ({
       label: option.displayName || option.email,
@@ -334,15 +340,23 @@ const Header = () => {
 
       // Gọi hàm uploadToFirestore để tải lên Firestore
       setTimeout(() => {
-        uploadToFirestore(title, postcontent, scope, file, currentUser.uid, email, colleagueGroup)
+        uploadToFirestore(
+          title,
+          postcontent,
+          scope,
+          file,
+          currentUser.uid,
+          email,
+          colleagueGroup
+        )
           .then(() => {
             setFile(null);
             message.success("Post create!");
             setIsEditModalVisible(false);
             setConfirmEditLoading(false);
             handleReset();
-            setColleagueGroup([])
-            setScope("public")
+            setColleagueGroup([]);
+            setScope("public");
           })
           .catch((error) => {
             message.error("Error uploading to Firestore");
@@ -396,10 +410,7 @@ const Header = () => {
   );
 
   const handleChange = (value) => {
-    setColleagueGroup(prev => [
-      ...prev,
-      value
-    ])
+    setColleagueGroup((prev) => [...prev, value]);
   };
 
   const handleDeselect = (value) => {
@@ -407,7 +418,7 @@ const Header = () => {
     if (index > -1) {
       colleagueGroup.splice(index, 1);
     }
-  }
+  };
 
   const layout = {
     labelCol: {
@@ -422,6 +433,30 @@ const Header = () => {
     navigator.clipboard.writeText(uid)
     setTitleTooltipUID("Copied User ID")
   }
+  
+  useEffect(() => {
+    // Create a Firestore query to fetch posts where the current user is included in the scopeUsers array
+    const q = query(
+      collection(db, "posts"),
+      or(
+        where("scope", "==", "public"),
+        (where("scope", "==", "custom"),
+        where("customGroup", "array-contains", uid)),
+        where("scope", "==", department)
+      )
+    );
+
+    // Subscribe to real-time updates for the query
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "modified") {
+          const updatedDoc = { id: change.doc.id, ...change.doc.data() };
+          setNewPost((prev) => [...prev, updatedDoc]);
+          console.log("Updated document:", updatedDoc);
+          // Perform any additional logic with the updated document
+        }
+      });
+    });
 
   const uploadButton = (
     <div>
@@ -670,18 +705,20 @@ const Header = () => {
                     <Radio value={currentUser.department}>Private</Radio>
                   )}
                   <Radio value="custom">
-                    {<Select
-                      mode="multiple"
-                      allowClear
-                      style={{
-                        width: '100%',
-                        overflowX: "visible"
-                      }}
-                      placeholder="Custom Group"
-                      onSelect={handleChange}
-                      options={Object(result)}
-                      onDeselect={handleDeselect}
-                    />}
+                    {
+                      <Select
+                        mode="multiple"
+                        allowClear
+                        style={{
+                          width: "15vw",
+                          overflowX: "visible",
+                        }}
+                        placeholder="Custom Group"
+                        onSelect={handleChange}
+                        options={Object(result)}
+                        onDeselect={handleDeselect}
+                      />
+                    }
                   </Radio>
                 </Radio.Group>
               </Form.Item>
@@ -707,8 +744,16 @@ const Header = () => {
         <div className="icon-btn-container">
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
         </div>
-        <Badge className="icon-btn-notification" count={newPost.length} size="default" overflowCount={9} onClick={() => setNewPost([])}>
-          <Avatar shape="circle" size="default">{<BellOutlined style={{ color: "black", fontSize: 18 }} />}</Avatar>
+        <Badge
+          className="icon-btn-notification"
+          count={newPost.length}
+          size="default"
+          overflowCount={9}
+          onClick={() => setNewPost([])}
+        >
+          <Avatar shape="circle" size="default">
+            {<BellOutlined style={{ color: "black", fontSize: 18 }} />}
+          </Avatar>
         </Badge>
         <Dropdown
           menu={{
@@ -719,8 +764,9 @@ const Header = () => {
         >
           <Avatar
             style={{
-              backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`
-                }`,
+              backgroundColor: `${
+                currentUser.photoURL ? "" : `#${randomColor}`
+              }`,
             }}
             src={currentUser.photoURL}
           >

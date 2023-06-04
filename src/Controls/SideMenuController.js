@@ -10,6 +10,9 @@ import {
   faNewspaper,
   faBuildingUser,
   faUsersBetweenLines,
+  faPeopleGroup,
+  faWarehouse,
+  faRightLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
 const SideMenuController = (roleID) => {
@@ -76,6 +79,11 @@ const SideMenuController = (roleID) => {
       return <FontAwesomeIcon icon={faBuildingUser} />;
     if (label === "Manage Department")
       return <FontAwesomeIcon icon={faUsersBetweenLines} />;
+    if (label === "Manage Customers")
+      return <FontAwesomeIcon icon={faPeopleGroup} />;
+    if (label === "Manage Storage")
+      return <FontAwesomeIcon icon={faWarehouse} />;
+    if (label === "Transaction") return <FontAwesomeIcon icon={faRightLeft} />;
     return null;
   };
 

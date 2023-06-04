@@ -98,7 +98,7 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
           await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             email: user.email,
-            displayName: user.displayName,
+            displayName: user.email,
             photoURL: user.photoURL,
             role: roleArray[keyRole].name,
             isActive: true,
