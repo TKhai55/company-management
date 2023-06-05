@@ -705,20 +705,18 @@ const Header = () => {
                     <Radio value={currentUser.department}>Private</Radio>
                   )}
                   <Radio value="custom">
-                    {
-                      <Select
-                        mode="multiple"
-                        allowClear
-                        style={{
-                          width: "15vw",
-                          overflowX: "visible",
-                        }}
-                        placeholder="Custom Group"
-                        onSelect={handleChange}
-                        options={Object(result)}
-                        onDeselect={handleDeselect}
-                      />
-                    }
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      style={{
+                        width: "15vw",
+                        overflowX: "visible",
+                      }}
+                      placeholder="Custom Group"
+                      onSelect={handleChange}
+                      options={Object(result)}
+                      onDeselect={handleDeselect}
+                    />
                   </Radio>
                 </Radio.Group>
               </Form.Item>
