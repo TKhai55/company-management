@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
 import "./ManageDepartment.css";
@@ -8,12 +8,22 @@ import {
   DeleteDepartmentData,
   EditDepartmentData,
 } from "../../Controls/CreateDepartmentController";
-import { Table, Space, Form, Button, Input, message, Select } from "antd";
+import { GetDepartmentName } from "../../Controls/ManageDepartment";
+import {
+  Table,
+  Space,
+  Form,
+  Button,
+  Input,
+  message,
+  Select,
+  Empty,
+} from "antd";
 import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
 import { getDocs, collection } from "firebase/firestore";
-
+import { AuthContext } from "../components/Context/AuthProvider";
 function ManageDepartment() {
   const columns = [
     {
@@ -64,7 +74,11 @@ function ManageDepartment() {
       ),
     },
   ];
+  const {
+    user: { department, uid },
+  } = useContext(AuthContext);
 
+  console.log(department);
   const colRef = collection(db, "Department");
 
   const fetchData = async () => {
@@ -217,105 +231,120 @@ function ManageDepartment() {
       <div className="App-Content-container">
         <SideMenu />
         <div className="App-Content-Main">
-          <div className="ManageDepartment-container">
-            <div className="role-create">
-              <Input.Search
-                className="role-create-search"
-                placeholder="Enter keywords"
-                enterButton="Search"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                onSearch={(value) => setSearchText(value)}
-              />
-              <Button
-                id="role-btn-create"
-                onClick={() => setIsCreateModalVisible(true)}
-              >
-                Create Role
-              </Button>
-              <CustomModal
-                title="Create new department"
-                open={isCreateModalVisible}
-                onCancel={handleCreateCancel}
-                confirmLoading={confirmCreateLoading}
-                onOk={handleCreateOk}
-              >
-                <Form form={form} ref={formRef}>
-                  <Form.Item
-                    label="Name"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 18 }}
-                    name="name"
-                    required
-                    tooltip="This is a required field"
-                  >
-                    <Input
-                      placeholder="Department name"
-                      onChange={(value) =>
-                        handleSelectChange("name", value.target.value)
-                      }
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    label="Leader"
-                    name="leader"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 18 }}
-                    required
-                    tooltip="This is a required field"
-                  >
-                    <Select
-                      options={selectUserOptions}
-                      defaultValue="Chose leader"
-                      labelInValue
-                      onChange={(value) => {
-                        handleSelectChange("leader", value.value);
-                        handleSelectChange("leadermail", value.label);
-                      }}
-                    />
-                  </Form.Item>
-                </Form>
-              </CustomModal>
-              <CustomModal
-                title="Edit role"
-                open={isEditModalVisible}
-                onCancel={handleEditCancel}
-                confirmLoading={confirmEditLoading}
-                onOk={handleEditOk}
-              >
-                <Form form={form} ref={formRef}>
-                  <Form.Item
-                    label="Leader"
-                    name="leader"
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 18 }}
-                    required
-                    tooltip="This is a required field"
-                  >
-                    <Select
-                      options={selectUserOptions}
-                      defaultValue="Chose leader"
-                      labelInValue
-                    />
-                  </Form.Item>
-                </Form>
-              </CustomModal>
+          {department ? (
+            <div className="ManageDepartment-container">
+              <h1>{department}</h1>
+              <div className="role-create">
+                <Input.Search
+                  className="role-create-search"
+                  placeholder="Enter keywords"
+                  enterButton="Search"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  onSearch={(value) => setSearchText(value)}
+                />
+
+                <Button
+                  id="role-btn-create"
+                  onClick={() => setIsCreateModalVisible(true)}
+                >
+                  Create Role
+                </Button>
+                <CustomModal
+                  title="Create new department"
+                  open={isCreateModalVisible}
+                  onCancel={handleCreateCancel}
+                  confirmLoading={confirmCreateLoading}
+                  onOk={handleCreateOk}
+                >
+                  <Form form={form} ref={formRef}>
+                    <Form.Item
+                      label="Name"
+                      labelCol={{ span: 5 }}
+                      wrapperCol={{ span: 18 }}
+                      name="name"
+                      required
+                      tooltip="This is a required field"
+                    >
+                      <Input
+                        placeholder="Department name"
+                        onChange={(value) =>
+                          handleSelectChange("name", value.target.value)
+                        }
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      label="Leader"
+                      name="leader"
+                      labelCol={{ span: 5 }}
+                      wrapperCol={{ span: 18 }}
+                      required
+                      tooltip="This is a required field"
+                    >
+                      <Select
+                        options={selectUserOptions}
+                        defaultValue="Chose leader"
+                        labelInValue
+                        onChange={(value) => {
+                          handleSelectChange("leader", value.value);
+                          handleSelectChange("leadermail", value.label);
+                        }}
+                      />
+                    </Form.Item>
+                  </Form>
+                </CustomModal>
+                <CustomModal
+                  title="Edit role"
+                  open={isEditModalVisible}
+                  onCancel={handleEditCancel}
+                  confirmLoading={confirmEditLoading}
+                  onOk={handleEditOk}
+                >
+                  <Form form={form} ref={formRef}>
+                    <Form.Item
+                      label="Leader"
+                      name="leader"
+                      labelCol={{ span: 5 }}
+                      wrapperCol={{ span: 18 }}
+                      required
+                      tooltip="This is a required field"
+                    >
+                      <Select
+                        options={selectUserOptions}
+                        defaultValue="Chose leader"
+                        labelInValue
+                      />
+                    </Form.Item>
+                  </Form>
+                </CustomModal>
+              </div>
+              <div className="role-table-container">
+                <Table
+                  className="role-table"
+                  dataSource={filteredItems}
+                  columns={columns}
+                  pagination={{ pageSize: 5 }}
+                />
+                <DeleteModal
+                  open={isDeleteModalVisible}
+                  onOk={handleDeleteOk}
+                  confirmLoading={confirmDeleteLoading}
+                  onCancel={handleDeleteCancel}
+                />
+              </div>
             </div>
-            <div className="role-table-container">
-              <Table
-                className="role-table"
-                dataSource={filteredItems}
-                columns={columns}
-                pagination={{ pageSize: 5 }}
-              />
-              <DeleteModal
-                open={isDeleteModalVisible}
-                onOk={handleDeleteOk}
-                confirmLoading={confirmDeleteLoading}
-                onCancel={handleDeleteCancel}
-              />
+          ) : (
+            <div
+              style={{
+                height: "60%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Empty />
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
