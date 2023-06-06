@@ -21,7 +21,7 @@ import {
   Tooltip,
   DatePicker,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, NotificationOutlined, UploadOutlined, } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, NotificationOutlined, UploadOutlined } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
@@ -66,14 +66,11 @@ const Header = () => {
   const [departmentName, setDepartmentName] = useState("")
   const [birthdayString, setBirthdayString] = useState("")
   const [selectedAvatarFile, setSelectedAvatarFile] = useState(null)
-  const {
-    user: { uid, email, displayName, role, department, photoURL, phoneNumber, location },
-  } = useContext(AuthContext);
   const randomColor = Math.floor(Math.random() * 16777215).toString(16);
   const navigate = useNavigate();
   const {
     isAuthenticated,
-    user: { uid, email, displayName, role, department, photoURL, phoneNumber, location },
+    user: { uid, email, displayName, role, department, photoURL, phoneNumber, location }
   } = useContext(AuthContext);
   const [editableDisplayName, setEditableDisplayName] = useState(displayName)
   const [phoneNumberCurrentUser, setPhoneNumberCurrentUser] = useState(phoneNumber)
@@ -117,10 +114,8 @@ const Header = () => {
         })
       })
     }
-
-
-
   };
+
   const handleEditProfileCancel = () => {
     setIsModalEditProfileOpen(false);
   };
@@ -311,6 +306,12 @@ const Header = () => {
   const [confirmEditLoading, setConfirmEditLoading] = useState(false);
   const [form] = Form.useForm();
   const formRef = useRef(null);
+  const [fileList, setFileList] = useState([{
+    uid: '-1',
+    name: 'image.png',
+    status: 'done',
+    url: photoURL,
+  }]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -433,30 +434,28 @@ const Header = () => {
     navigator.clipboard.writeText(uid)
     setTitleTooltipUID("Copied User ID")
   }
-  
-  useEffect(() => {
-    // Create a Firestore query to fetch posts where the current user is included in the scopeUsers array
-    const q = query(
-      collection(db, "posts"),
-      or(
-        where("scope", "==", "public"),
-        (where("scope", "==", "custom"),
-        where("customGroup", "array-contains", uid)),
-        where("scope", "==", department)
-      )
-    );
 
-    // Subscribe to real-time updates for the query
+  useEffect(() => {
+    const q = query(collection(db, "posts"), or(
+      where("scope", "==", "public"),
+      (
+        where("scope", "==", "custom"),
+        where("customGroup", "array-contains", uid)
+      ),
+      where("scope", "==", department)
+    ))
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         if (change.type === "modified") {
-          const updatedDoc = { id: change.doc.id, ...change.doc.data() };
-          setNewPost((prev) => [...prev, updatedDoc]);
-          console.log("Updated document:", updatedDoc);
-          // Perform any additional logic with the updated document
+          const updateDoc = { id: change.doc.id, ...change.doc.data() }
+          setNewPost((prev) => [...prev, updateDoc])
         }
-      });
-    });
+      })
+    })
+
+    return () => unsubscribe()
+  }, [uid])
 
   const uploadButton = (
     <div>
@@ -471,12 +470,7 @@ const Header = () => {
     </div>
   );
 
-  const [fileList, setFileList] = useState([{
-    uid: '-1',
-    name: 'image.png',
-    status: 'done',
-    url: photoURL,
-  }]);
+
 
   const handleCancelEditAvatar = () => setPreviewOpenEditAvatar(false);
   const handlePreviewEditAvatar = async (file) => {
@@ -764,9 +758,8 @@ const Header = () => {
         >
           <Avatar
             style={{
-              backgroundColor: `${
-                currentUser.photoURL ? "" : `#${randomColor}`
-              }`,
+              backgroundColor: `${currentUser.photoURL ? "" : `#${randomColor}`
+                }`,
             }}
             src={currentUser.photoURL}
           >
@@ -778,6 +771,7 @@ const Header = () => {
       </div>
     </div>
   );
+
 };
 
 export default Header;
