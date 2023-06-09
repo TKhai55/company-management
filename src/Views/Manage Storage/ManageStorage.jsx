@@ -4,13 +4,11 @@ import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
 import {
   Button,
-  Col,
   Form,
   Empty,
   Input,
   InputNumber,
   Modal,
-  Row,
   Space,
   Table,
   message,
@@ -121,6 +119,91 @@ const ManageStorage = () => {
           </Button>
         </Space>
       ),
+    },
+  ];
+
+  const columns1 = [
+    {
+      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Type</span>,
+      dataIndex: "type",
+      key: "type",
+      render: (text, record) => (
+        <h4 style={{ color: record.loaiGD ? "green" : "red" }}>
+          {record.loaiGD ? "Export" : "Import"}
+        </h4>
+      ),
+    },
+    {
+      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Date</span>,
+      dataIndex: "date",
+      key: "date",
+      render: (text) => <p>{formatDate(text)}</p>,
+    },
+    {
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Customer</span>
+      ),
+      dataIndex: "khachhang",
+      key: "khachhang",
+      render: (text) => <p>{text}</p>,
+    },
+    {
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Price</span>
+      ),
+      dataIndex: "dongia",
+      key: "dongia",
+      render: (text) => (
+        <p>
+          {text.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </p>
+      ),
+    },
+    {
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Quantity</span>
+      ),
+      dataIndex: "sl",
+      key: "sl",
+      render: (text) => <p>{text}</p>,
+    },
+    {
+      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Unit</span>,
+      dataIndex: "donvi",
+      key: "donvi",
+      render: (text) => <p>{text}</p>,
+    },
+    {
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Total</span>
+      ),
+      dataIndex: "tongtien",
+      key: "tongtien",
+      render: (text) => (
+        <p>
+          {text.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          })}
+        </p>
+      ),
+    },
+    {
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Employee</span>
+      ),
+      dataIndex: "nguoimuaban",
+      key: "nguoimuaban",
+      render: (text) => <p>{text}</p>,
+    },
+    {
+      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Note</span>,
+      dataIndex: "ghichu",
+      key: "ghichu",
+      render: (text) => <p>{text}</p>,
     },
   ];
 
@@ -282,6 +365,7 @@ const ManageStorage = () => {
     if (isEditModalVisible === true || isDeleteModalVisible === true)
       return null;
     else {
+      setEditData(record);
       setproductId(record.id);
       setVisible(true);
     }
@@ -390,12 +474,12 @@ const ManageStorage = () => {
                       placeholder="Price"
                       onChange={(value) => handleSelectChange("giaban", value)}
                       formatter={(value) =>
-                        `${value.toLocaleString("vi-VN", {
-                          maximumFractionDigits: 0,
-                          minimumFractionDigits: 0,
-                          useGrouping: true,
-                        })} ₫`
+                        value
+                          ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                            "đ"
+                          : null
                       }
+                      parser={(value) => value.replace(/\đ\s?|(,*)/g, "")}
                     />
                   </Form.Item>
                 </Form>
@@ -434,12 +518,12 @@ const ManageStorage = () => {
                       style={{ width: "10vw" }}
                       placeholder="Price"
                       formatter={(value) =>
-                        `${value.toLocaleString("vi-VN", {
-                          maximumFractionDigits: 0,
-                          minimumFractionDigits: 0,
-                          useGrouping: true,
-                        })} ₫`
+                        value
+                          ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                            "đ"
+                          : null
                       }
+                      parser={(value) => value.replace(/\đ\s?|(,*)/g, "")}
                     />
                   </Form.Item>
                 </Form>
@@ -451,119 +535,32 @@ const ManageStorage = () => {
                   maxHeight: "65vh",
                   overflowX: "hidden",
                 }}
-                title="Transaction's History"
+                title={`History transaction of "${editData.name}"`}
                 open={visible}
                 onCancel={handleCloseModal}
                 footer={null}
               >
-                <Row
-                  gutter={16}
-                  style={{
-                    paddingTop: "8px",
-                    paddingBottom: "8px",
-                    fontWeight: "bolder",
-                    borderBottom: "1px solid #A4A4A4",
-                    borderTop: "1px solid #A4A4A4",
+                <Table
+                  bordered
+                  dataSource={historyItems}
+                  columns={columns1}
+                  pagination={false}
+                  rowKey={(record, index) => index}
+                  locale={{
+                    emptyText: (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "40vh",
+                        }}
+                      >
+                        <Empty />
+                      </div>
+                    ),
                   }}
-                >
-                  <Col span={2}>
-                    <p>TYPE</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>NAME</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>DATE</p>
-                  </Col>
-                  <Col span={4}>
-                    <p>CUSTOMER</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>PRICE</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>QUANTITY</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>UNIT</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>TOTAL</p>
-                  </Col>
-                  <Col span={2}>
-                    <p>EMPLOYEE</p>
-                  </Col>
-                  <Col span={4}>
-                    <p>NOTE</p>
-                  </Col>
-                </Row>
-                {historyItems.length > 0 ? (
-                  historyItems.map((item, index) => (
-                    <Row
-                      gutter={16}
-                      key={index}
-                      style={{
-                        borderBottom: "1px solid #CAC7C7",
-                        paddingTop: "8px",
-                        paddingBottom: "4px",
-                      }}
-                    >
-                      <Col span={2}>
-                        <h4 style={{ color: item.loaiGD ? "green" : "red" }}>
-                          {item.loaiGD ? "Export" : "Import"}
-                        </h4>
-                      </Col>
-                      <Col span={2}>
-                        <p>{item.name}</p>
-                      </Col>
-                      <Col span={2}>
-                        <p>{formatDate(item.date)}</p>
-                      </Col>
-                      <Col span={4}>
-                        <p>{item.khachhang}</p>
-                      </Col>
-                      <Col span={2}>
-                        <p>
-                          {item.dongia.toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          })}
-                        </p>
-                      </Col>
-                      <Col span={2}>
-                        <p>{item.sl}</p>
-                      </Col>
-                      <Col span={2}>
-                        <p>{item.donvi}</p>
-                      </Col>
-                      <Col span={2}>
-                        <p>
-                          {item.tongtien.toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          })}
-                        </p>
-                      </Col>
-                      <Col span={2}>
-                        <p>{item.nguoimuaban}</p>
-                      </Col>
-                      <Col span={4}>
-                        <p>{item.ghichu}</p>
-                      </Col>
-                    </Row>
-                  ))
-                ) : (
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      height: "40vh",
-                    }}
-                  >
-                    <Empty />
-                  </div>
-                )}
+                />
               </Modal>
             </div>
           </div>

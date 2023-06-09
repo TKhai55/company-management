@@ -287,12 +287,12 @@ const Transaction = () => {
                         allowClear
                         value={price}
                         formatter={(value) =>
-                          `${value.toLocaleString("vi-VN", {
-                            maximumFractionDigits: 0,
-                            minimumFractionDigits: 0,
-                            useGrouping: true,
-                          })} ₫`
+                          value
+                            ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
+                              "đ"
+                            : null
                         }
+                        parser={(value) => value.replace(/\đ\s?|(,*)/g, "")}
                         onChange={handlePriceChange}
                       />
                     </Form.Item>

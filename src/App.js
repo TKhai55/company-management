@@ -19,6 +19,7 @@ import ManageCustomers from "./Views/Manage Customers/ManageCustomers";
 import ManageStorage from "./Views/Manage Storage/ManageStorage";
 import Test from "./Test";
 import Transaction from "./Views/Transaction/Transaction";
+import MakePlan from "./Views/Make Plan/MakePlan";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/managecustomers" element={<ManageCustomers />} />
           <Route path="/managestorage" element={<ManageStorage />} />
           <Route path="/transaction" element={<Transaction />} />
+          <Route path="/makeplan" element={<MakePlan />} />
           <Route path="/video" element={<JitsiMeet />} />
         </Routes>
       </MenuProvider>

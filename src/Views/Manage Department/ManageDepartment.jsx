@@ -3,12 +3,10 @@ import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
 import "./ManageDepartment.css";
 import {
+  GetDepartmentName,
   GetUserData,
   AddDepartmentData,
-  DeleteDepartmentData,
-  EditDepartmentData,
-} from "../../Controls/CreateDepartmentController";
-import { GetDepartmentName } from "../../Controls/ManageDepartment";
+} from "../../Controls/ManageDepartment";
 import {
   Table,
   Space,
@@ -19,30 +17,34 @@ import {
   Select,
   Empty,
 } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
-import { getDocs, collection } from "firebase/firestore";
+import { getDocs, collection, query, where } from "firebase/firestore";
 import { AuthContext } from "../components/Context/AuthProvider";
 function ManageDepartment() {
   const columns = [
     {
-      title: <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Name</span>,
-      dataIndex: "name",
-      key: "name",
+      title: (
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>
+          Employee Name
+        </span>
+      ),
+      dataIndex: "displayName",
+      key: "displayName",
       align: "center",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: (a, b) => a.displayName.localeCompare(b.displayName),
     },
     {
       title: (
-        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>
-          Leader Mail
-        </span>
+        <span style={{ color: "#4ca3f5", fontWeight: "bold" }}>Email</span>
       ),
-      dataIndex: "leadermail",
-      key: "leadermail",
+      dataIndex: "email",
+      key: "email",
       align: "center",
-      sorter: (a, b) => a.leadermail.localeCompare(b.key),
+      sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: (
@@ -53,22 +55,13 @@ function ManageDepartment() {
       render: (_, record) => (
         <Space size="middle">
           <Button
-            style={{ backgroundColor: "#4ca3f5", color: "#ffffff" }}
-            onClick={() => {
-              setrecordID(record.id);
-              setIsEditModalVisible(true);
-            }}
-          >
-            Edit
-          </Button>
-          <Button
             style={{ backgroundColor: "red", color: "#ffffff" }}
             onClick={() => {
               setrecordID(record.id);
               setIsDeleteModalVisible(true);
             }}
           >
-            Delete
+            <FontAwesomeIcon icon={faTrash} />
           </Button>
         </Space>
       ),
@@ -78,11 +71,33 @@ function ManageDepartment() {
     user: { department, uid },
   } = useContext(AuthContext);
 
-  console.log(department);
-  const colRef = collection(db, "Department");
+  const [departmentName, setdepartmentName] = useState("");
+  const colRef = collection(db, "users");
 
-  const fetchData = async () => {
-    const querySnapshot = await getDocs(colRef);
+  const getName = async () => {
+    const data = await GetDepartmentName(department);
+    setdepartmentName(data);
+  };
+  const fetchData = async (department) => {
+    const q = query(
+      colRef,
+      where("department", "==", department),
+      where("role", "==", "Employee")
+    );
+    const querySnapshot = await getDocs(q);
+    const data = [];
+    querySnapshot.forEach((doc) => {
+      data.push({ id: doc.id, ...doc.data() });
+    });
+    return data;
+  };
+  const fetchSelectData = async () => {
+    const q = query(
+      colRef,
+      where("department", "==", null),
+      where("role", "==", "Employee")
+    );
+    const querySnapshot = await getDocs(q);
     const data = [];
     querySnapshot.forEach((doc) => {
       data.push({ id: doc.id, ...doc.data() });
@@ -90,22 +105,14 @@ function ManageDepartment() {
     return data;
   };
 
-  const selectUser = GetUserData();
+  const [selectUser, setselectUser] = useState([]);
   const selectUserOptions = [
-    {
-      label: "Tạm trống",
-      value: null,
-    },
     ...selectUser.map((option) => ({
-      label: option.email,
+      label: option.displayName,
       value: option.id,
     })),
   ];
-  const [formCreateValues, setFormCreateValues] = useState({
-    leader: undefined,
-    leadermail: undefined,
-    name: undefined,
-  });
+  const [employeeID, setEmployeeID] = useState("");
 
   const [tableItems, setTableItems] = useState([]);
   // let tableItems = []
@@ -115,59 +122,28 @@ function ManageDepartment() {
   const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [confirmCreateLoading, setConfirmCreateLoading] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [confirmEditLoading, setConfirmEditLoading] = useState(false);
 
   const getData = async () => {
-    const data = await fetchData();
+    const data = await fetchData(department);
     setTableItems(data);
   };
-
+  const getSelectData = async () => {
+    const data = await fetchSelectData();
+    setselectUser(data);
+  };
   useEffect(() => {
+    getName();
+  }, []);
+  useEffect(() => {
+    getSelectData();
     getData();
   }, []);
 
   const filteredItems = tableItems.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      item.leadermail.toLowerCase().includes(searchText.toLowerCase())
+      item.displayName.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.email.toLowerCase().includes(searchText.toLowerCase())
   );
-
-  const handleEditCancel = () => {
-    formRef.current.resetFields();
-    setIsEditModalVisible(false);
-  };
-
-  const handleEditOk = () => {
-    form.validateFields().then((values) => {
-      if (!values.leader) {
-        message.error("Please full filled data");
-        return; // Ngăn không cho việc xử lý tiếp tục
-      }
-      setConfirmEditLoading(true);
-      setTimeout(async () => {
-        const formValues = formRef.current.getFieldValue("leader");
-        // console.log("1", recordId);
-        // console.log("2", formValues.value);
-        const documentId = await EditDepartmentData(
-          recordId,
-          formValues.value,
-          formValues.label
-        );
-        console.log(documentId);
-        if (documentId !== false) {
-          getData();
-          message.success("Edit successfully!");
-          formRef.current.resetFields();
-        } else {
-          formRef.current.resetFields();
-          message.error(`Can not assign 2 department for 1 leader`);
-        }
-        setIsEditModalVisible(false);
-        setConfirmEditLoading(false);
-      }, 1000);
-    });
-  };
 
   const handleCreateCancel = () => {
     formRef.current.resetFields();
@@ -176,36 +152,43 @@ function ManageDepartment() {
 
   const handleCreateOk = () => {
     form.validateFields().then((values) => {
-      if (!values.name || !values.leader) {
-        message.error("Please full filled data");
-        return; // Ngăn không cho việc xử lý tiếp tục
+      if (!values.employee) {
+        message.error("Please fill in all the required fields");
+        return;
       }
 
-      // Xử lý tiếp tục khi đã có nội dung trong input
       setConfirmCreateLoading(true);
-      setTimeout(async () => {
-        const documentId = await AddDepartmentData(formCreateValues);
-        if (documentId) {
-          message.success(`Create ${formCreateValues.name} successfully!`);
+      AddDepartmentData(employeeID, department)
+        .then((result) => {
+          if (result) {
+            getSelectData();
+
+            getData();
+            return null;
+          } else {
+            message.error("Can not assign 2 departments to 1 leader");
+          }
+        })
+        .then(() => {
+          message.success("Add employee successfully!");
           formRef.current.resetFields();
-          console.log("Data saved successfully");
-          getData();
-        } else {
-          formRef.current.resetFields();
-          message.error(`Can not assign 2 department for 1 leader`);
-        }
-        setIsCreateModalVisible(false);
-        setConfirmCreateLoading(false);
-      }, 1000);
+          setIsCreateModalVisible(false);
+          setConfirmCreateLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error adding department data: ", error);
+          setConfirmCreateLoading(false);
+        });
     });
   };
 
   const handleDeleteOk = () => {
     setConfirmDeleteLoading(true);
     setTimeout(async () => {
-      await DeleteDepartmentData(recordId);
+      await AddDepartmentData(recordId, null);
       message.success("Delete successfully!");
       getData();
+      getSelectData();
       setIsDeleteModalVisible(false);
       setConfirmDeleteLoading(false);
     }, 1000);
@@ -218,13 +201,6 @@ function ManageDepartment() {
   const [form] = Form.useForm();
   const formRef = useRef(null);
 
-  const handleSelectChange = (field, value) => {
-    setFormCreateValues((prevValues) => ({
-      ...prevValues,
-      [field]: value,
-    }));
-  };
-
   return (
     <div className="App-container">
       <Header />
@@ -233,7 +209,9 @@ function ManageDepartment() {
         <div className="App-Content-Main">
           {department ? (
             <div className="ManageDepartment-container">
-              <h1>{department}</h1>
+              <h3 style={{ marginLeft: "8vw", marginBottom: "3vh" }}>
+                Department: {departmentName.name}
+              </h3>
               <div className="role-create">
                 <Input.Search
                   className="role-create-search"
@@ -248,10 +226,10 @@ function ManageDepartment() {
                   id="role-btn-create"
                   onClick={() => setIsCreateModalVisible(true)}
                 >
-                  Create Role
+                  Add new employee
                 </Button>
                 <CustomModal
-                  title="Create new department"
+                  title="Add new employee"
                   open={isCreateModalVisible}
                   onCancel={handleCreateCancel}
                   confirmLoading={confirmCreateLoading}
@@ -259,60 +237,18 @@ function ManageDepartment() {
                 >
                   <Form form={form} ref={formRef}>
                     <Form.Item
-                      label="Name"
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 18 }}
-                      name="name"
-                      required
-                      tooltip="This is a required field"
-                    >
-                      <Input
-                        placeholder="Department name"
-                        onChange={(value) =>
-                          handleSelectChange("name", value.target.value)
-                        }
-                      />
-                    </Form.Item>
-                    <Form.Item
-                      label="Leader"
-                      name="leader"
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 18 }}
+                      label="Employee"
+                      name="employee"
                       required
                       tooltip="This is a required field"
                     >
                       <Select
                         options={selectUserOptions}
-                        defaultValue="Chose leader"
+                        defaultValue="Choose employee"
                         labelInValue
                         onChange={(value) => {
-                          handleSelectChange("leader", value.value);
-                          handleSelectChange("leadermail", value.label);
+                          setEmployeeID(value.value);
                         }}
-                      />
-                    </Form.Item>
-                  </Form>
-                </CustomModal>
-                <CustomModal
-                  title="Edit role"
-                  open={isEditModalVisible}
-                  onCancel={handleEditCancel}
-                  confirmLoading={confirmEditLoading}
-                  onOk={handleEditOk}
-                >
-                  <Form form={form} ref={formRef}>
-                    <Form.Item
-                      label="Leader"
-                      name="leader"
-                      labelCol={{ span: 5 }}
-                      wrapperCol={{ span: 18 }}
-                      required
-                      tooltip="This is a required field"
-                    >
-                      <Select
-                        options={selectUserOptions}
-                        defaultValue="Chose leader"
-                        labelInValue
                       />
                     </Form.Item>
                   </Form>
