@@ -13,7 +13,8 @@ import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
 import { getDocs, collection } from "firebase/firestore";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 function CreateDepartment() {
   const columns = [
     {
@@ -49,7 +50,7 @@ function CreateDepartment() {
               setIsEditModalVisible(true);
             }}
           >
-            Edit
+            <FontAwesomeIcon icon={faPenToSquare} />
           </Button>
           <Button
             style={{ backgroundColor: "red", color: "#ffffff" }}
@@ -58,7 +59,7 @@ function CreateDepartment() {
               setIsDeleteModalVisible(true);
             }}
           >
-            Delete
+            <FontAwesomeIcon icon={faTrash} />
           </Button>
         </Space>
       ),

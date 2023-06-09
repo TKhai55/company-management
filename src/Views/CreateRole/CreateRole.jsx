@@ -12,7 +12,8 @@ import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
 import { getDocs, collection } from "firebase/firestore";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 function CreateRole() {
   const columns = [
     {
@@ -53,7 +54,7 @@ function CreateRole() {
               setIsEditModalVisible(true);
             }}
           >
-            Edit
+            <FontAwesomeIcon icon={faPenToSquare} />
           </Button>
           <Button
             style={{ backgroundColor: "red", color: "#ffffff" }}
@@ -62,7 +63,7 @@ function CreateRole() {
               setIsDeleteModalVisible(true);
             }}
           >
-            Delete
+            <FontAwesomeIcon icon={faTrash} />
           </Button>
         </Space>
       ),

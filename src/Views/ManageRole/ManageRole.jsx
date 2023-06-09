@@ -18,6 +18,8 @@ import {
   message,
   Select,
 } from "antd";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import DeleteModal from "../components/Modals/ModalDelete";
 import CustomModal from "../components/Modals/Modal";
 import { db } from "../../Models/firebase/config";
@@ -71,7 +73,7 @@ function ManageRole() {
               setIsEditModalVisible(true);
             }}
           >
-            Edit
+            <FontAwesomeIcon icon={faPenToSquare} />
           </Button>
           <Button
             style={{ backgroundColor: "red", color: "#ffffff" }}
@@ -80,7 +82,7 @@ function ManageRole() {
               setIsDeleteModalVisible(true);
             }}
           >
-            Delete
+            <FontAwesomeIcon icon={faTrash} />
           </Button>
         </Space>
       ),
