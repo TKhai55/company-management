@@ -120,7 +120,7 @@ const MakePlan = () => {
     },
   ];
   const {
-    user: { department, uid },
+    user: { department, uid, role, displayName },
   } = useContext(AuthContext);
   const [form] = Form.useForm();
   const formRef = useRef(null);
@@ -128,18 +128,21 @@ const MakePlan = () => {
   const [initialRender, setInitialRender] = useState(true);
   const [departmentName, setDepartmentName] = useState("");
   const employee = GetEmployee();
-  const result = groupBy(employee, (option) => option.role);
+  const result = groupBy(employee, (option) => option.role, uid);
+
   const [tableData, setTableData] = useState([]);
   const [product, setProduct] = useState([]);
   const [formValue, setFormValue] = useState({
     employeeID: uid,
     department: department,
+    role: role,
+    name: displayName,
     title: null,
     start: null,
     end: null,
     planDetails: [
       {
-        productID: "null",
+        productID: null,
         type: null,
         profit: 0,
       },
@@ -180,13 +183,16 @@ const MakePlan = () => {
       value: option.uid,
     }));
   });
-  function groupBy(xs, f) {
+  function groupBy(xs, f, uidToExclude) {
     if (xs)
       return Object.entries(
-        xs.reduce(
-          (r, v, i, a, k = f(v)) => ((r[k] || (r[k] = [])).push(v), r),
-          {}
-        )
+        xs.reduce((r, v) => {
+          const k = f(v);
+          if (v.uid !== uidToExclude) {
+            (r[k] || (r[k] = [])).push(v);
+          }
+          return r;
+        }, {})
       ).map(([label, options]) => ({ label, options }));
   }
 

@@ -21,7 +21,13 @@ const GetEmployee = () => {
 };
 const AddPlanData = async (formValues) => {
   try {
-    const docRef = await db.collection("plan").add(formValues);
+    const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+    const docData = {
+      ...formValues,
+      createDate: timestamp,
+    };
+    const docRef = await db.collection("plan").add(docData);
     console.log("Document written with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
