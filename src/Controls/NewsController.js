@@ -27,7 +27,9 @@ const uploadToFirestore = async (
   scope,
   file,
   owner,
+  ownerName,
   emailOwner,
+  photoOwner,
   customGroup
 ) => {
   console.log(title);
@@ -57,7 +59,9 @@ const uploadToFirestore = async (
       scope,
       file: downloadURL,
       owner,
+      ownerName,
       emailOwner,
+      photoOwner,
       customGroup,
       timestamp: timestamp,
     });

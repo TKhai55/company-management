@@ -25,6 +25,12 @@ const News = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    var currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    var startOfDaySeconds = Math.floor(currentDate.getTime() / 1000);
+    currentDate.setHours(23, 59, 59, 999);
+    var endOfDaySeconds = Math.floor(currentDate.getTime() / 1000);
+
     const q = query(collection(db, "posts"),
       or(where('scope', '==', "public"),
         (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
@@ -38,13 +44,14 @@ const News = () => {
 
       snapshot.docChanges().forEach((change) => {
         const data = change.doc.data();
+        const timestamp = change.doc._document.createTime.timestamp.seconds
         news = { id: change.doc.id, ...data }
         if (change.type === "removed") {
           setNewsForCurrentUser(prevNews =>
             prevNews.filter(item => item.id !== news.id)
           );
         } else {
-          if (change.type === "modified") {
+          if (timestamp > startOfDaySeconds && timestamp < endOfDaySeconds) {
             news.isNew = true;
           }
           if (news.timestamp) {
@@ -63,6 +70,7 @@ const News = () => {
     span.innerHTML = s;
     return span.textContent || span.innerText;
   };
+
 
   return (
     <div className="App-container">
@@ -130,8 +138,8 @@ const News = () => {
                             onClick={() => navigate(`/news/${news.id}`)}
                           >
                             <Meta
-                              avatar={<Avatar>{news.emailOwner?.charAt(3).toUpperCase()}</Avatar>}
-                              title={<div>{news.emailOwner} <Text style={{ fontSize: 13 }} type="secondary">{` - ${dateFormat(news.timestamp.toDate(), "dddd, mmmm dS, yyyy, h:MM TT")}`}</Text></div>}
+                              avatar={news.photoOwner ? <Avatar src={news.photoOwner} /> : <Avatar>{news.emailOwner?.charAt(3).toUpperCase()}</Avatar>}
+                              title={<div>{news.ownerName ? news.ownerName : news.emailOwner} <Text style={{ fontSize: 13 }} type="secondary">{` - ${dateFormat(news.timestamp.toDate(), "dddd, mmmm dS, yyyy, h:MM TT")}`}</Text></div>}
                               description={extractContent(news.content).slice(0, 260).length === 260 ? `${extractContent(news.content).slice(0, 260)} ...` : `${extractContent(news.content)}`}
                             />
                             {news.file ? <Tag style={{ marginTop: 10 }} icon={<FileOutlined />} color="blue">{ref(storage, news.file).name}</Tag> : ""}
@@ -153,8 +161,8 @@ const News = () => {
                               onClick={() => navigate(`/news/${news.id}`)}
                             >
                               <Meta
-                                avatar={<Avatar>{news.emailOwner?.charAt(3).toUpperCase()}</Avatar>}
-                                title={<div>{news.emailOwner} <Text style={{ fontSize: 13 }} type="secondary">{` - ${dateFormat(news.timestamp.toDate(), "dddd, mmmm dS, yyyy, h:MM TT")}`}</Text></div>}
+                                avatar={news.photoOwner ? <Avatar src={news.photoOwner} /> : <Avatar>{news.emailOwner?.charAt(3).toUpperCase()}</Avatar>}
+                                title={<div>{news.ownerName ? news.ownerName : news.emailOwner} <Text style={{ fontSize: 13 }} type="secondary">{` - ${dateFormat(news.timestamp.toDate(), "dddd, mmmm dS, yyyy, h:MM TT")}`}</Text></div>}
                                 description={extractContent(news.content).slice(0, 260).length === 260 ? `${extractContent(news.content).slice(0, 260)} ...` : `${extractContent(news.content)}`}
                               />
                               {news.file ? <Tag style={{ marginTop: 10 }} icon={<FileOutlined />} color="blue">{ref(storage, news.file).name}</Tag> : ""}

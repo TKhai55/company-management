@@ -14,11 +14,10 @@ import ManageAccount from "./Views/components/Admin/ManageAccount/ManageAccount"
 import CreateDepartment from "./Views/Create Department/CreateDepartment";
 import ManageDepartment from "./Views/Manage Department/ManageDepartment";
 import NewsDetails from "./Views/News/NewsDetail/NewsDetails";
-import MyPosts from "./Views/MyPosts/MyPosts";
 import ManageCustomers from "./Views/Manage Customers/ManageCustomers";
 import ManageStorage from "./Views/Manage Storage/ManageStorage";
-import Test from "./Test";
 import Transaction from "./Views/Transaction/Transaction";
+import MyPosts from "./Views/components/Header/MyPosts/MyPosts";
 
 function App() {
   return (
