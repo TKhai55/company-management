@@ -1,7 +1,4 @@
 import React, { useContext, useEffect, useState } from "react";
-import Header from "../components/Header/Header";
-import SideMenu from "../components/SideMenu/SideMenu";
-import { AuthContext } from "../components/Context/AuthProvider";
 import {
     collection,
     deleteDoc,
@@ -12,12 +9,15 @@ import {
     updateDoc,
     where,
 } from "firebase/firestore";
-import { db } from "../../Models/firebase/config";
 import { FloatButton, Form, Input, List, Modal, Space, message } from "antd";
 import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
 import "./MyPosts.css";
-import DeleteModal from "../components/Modals/ModalDelete";
 import ReactQuill from "react-quill";
+import { db } from "../../../../Models/firebase/config";
+import { AuthContext } from "../../Context/AuthProvider";
+import Header from "../Header";
+import SideMenu from "../../SideMenu/SideMenu";
+import DeleteModal from "../../Modals/ModalDelete";
 
 export default function MyPosts() {
     const {
