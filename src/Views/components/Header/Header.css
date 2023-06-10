@@ -61,3 +61,8 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+.list-item-notifications:hover {
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+}
+

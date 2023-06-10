@@ -20,13 +20,14 @@ import {
   Dropdown,
   Tooltip,
   DatePicker,
+  List,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, NotificationOutlined, UploadOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
 import { MenuContext } from "../../../Controls/SideMenuProvider";
-import { collection, doc, getDoc, getDocs, onSnapshot, or, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getCountFromServer, getDoc, getDocs, onSnapshot, or, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
 import { uploadToFirestore } from "../../../Controls/NewsController";
 import ImgCrop from 'antd-img-crop';
@@ -39,6 +40,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
+import { formatRelative } from "date-fns";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -51,7 +53,6 @@ const getBase64 = (file) =>
 
 const Header = () => {
   const [currentUser, setCurrentUser] = useState({});
-
   const { updateRoleID } = useContext(MenuContext);
   const { updateLoad } = useContext(MenuContext);
   const [optionsColleague, setOptionsColleague] = useState([])
@@ -72,6 +73,12 @@ const Header = () => {
     isAuthenticated,
     user: { uid, email, displayName, role, department, photoURL, phoneNumber, location }
   } = useContext(AuthContext);
+  const [fileList, setFileList] = useState([{
+    // uid: '-1',
+    // name: 'image.png',
+    // status: 'done',
+    // url: photoURL,
+  }]);
   const [editableDisplayName, setEditableDisplayName] = useState(displayName)
   const [phoneNumberCurrentUser, setPhoneNumberCurrentUser] = useState(phoneNumber)
   const [currentLocation, setCurrentLocation] = useState(location)
@@ -158,6 +165,7 @@ const Header = () => {
             updateRoleID("");
             updateLoad(true);
             auth.signOut();
+            setFileList([{}])
           }}
         >
           Log out
@@ -231,38 +239,44 @@ const Header = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach(change => {
         setCurrentUser(change.doc.data())
+        setFileList([{ url: change.doc.data().photoURL }])
       })
     })
 
     return () => unsubscribe()
   }, [uid])
 
+  let countCurrentNews = useRef(null)
+  let countNewNews = useRef(null)
+  const [notificationCount, setNotificationCount] = useState(0)
+
   useEffect(() => {
+    async function getCountPosts() {
+      const snapshot = await getCountFromServer(collection(db, "posts"),
+        or((where('scope', '==', "public")),
+          (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
+          where("scope", "==", department),
+        ))
+      countCurrentNews.current = snapshot.data().count
+    }
+
+    getCountPosts()
+
     const q = query(collection(db, "posts"),
-      or(where('scope', '==', "public"),
+      or((where('scope', '==', "public")),
         (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
         (where("scope", "==", department)),
-        (where("owner", "==", uid))
       ), orderBy("timestamp", "desc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const updatedNews = [];
-      let news = {}
-
-      snapshot.docChanges().forEach((change) => {
-        const data = change.doc.data();
-        news = { id: change.doc.id, ...data }
-        if (change.type === "modified") {
-          news.isNew = true;
-        }
-        if (news.timestamp) {
-          updatedNews.push(news);
-        }
+    onSnapshot(q, (querySnapshot) => {
+      const post = [];
+      querySnapshot.forEach((doc) => {
+        post.push(doc.data());
       });
-      setNewPost((prevNews) => [...updatedNews, ...prevNews]);
+      setNewPost(post)
+      countNewNews.current = querySnapshot.size
+      setNotificationCount(countNewNews.current - countCurrentNews.current)
     });
-    return () => unsubscribe();
-  }, [uid, department])
+  }, [])
 
   useEffect(() => {
     async function getDepartmentName() {
@@ -306,12 +320,6 @@ const Header = () => {
   const [confirmEditLoading, setConfirmEditLoading] = useState(false);
   const [form] = Form.useForm();
   const formRef = useRef(null);
-  const [fileList, setFileList] = useState([{
-    uid: '-1',
-    name: 'image.png',
-    status: 'done',
-    url: photoURL,
-  }]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -347,7 +355,9 @@ const Header = () => {
           scope,
           file,
           currentUser.uid,
+          displayName,
           email,
+          photoURL,
           colleagueGroup
         )
           .then(() => {
@@ -368,22 +378,6 @@ const Header = () => {
     });
   };
 
-  // const handleOk = () => {
-  //   form.validateFields().then((values) => {
-  //     if (!values.title || !values.content) {
-  //       message.error("Please full filled data");
-  //       return; // Ngăn không cho việc xử lý tiếp tục
-  //     }
-
-  //     // Xử lý tiếp tục khi đã có nội dung trong input
-  //     setConfirmEditLoading(true);
-  //     setTimeout(() => {
-  //       setIsEditModalVisible(false);
-  //       setConfirmEditLoading(false);
-  //       handleReset();
-  //     }, 1000);
-  //   });
-  // };
   const handleCancel = () => {
     setIsEditModalVisible(false);
   };
@@ -435,28 +429,6 @@ const Header = () => {
     setTitleTooltipUID("Copied User ID")
   }
 
-  useEffect(() => {
-    const q = query(collection(db, "posts"), or(
-      where("scope", "==", "public"),
-      (
-        where("scope", "==", "custom"),
-        where("customGroup", "array-contains", uid)
-      ),
-      where("scope", "==", department)
-    ))
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type === "modified") {
-          const updateDoc = { id: change.doc.id, ...change.doc.data() }
-          setNewPost((prev) => [...prev, updateDoc])
-        }
-      })
-    })
-
-    return () => unsubscribe()
-  }, [uid])
-
   const uploadButton = (
     <div>
       <PlusOutlined />
@@ -470,7 +442,70 @@ const Header = () => {
     </div>
   );
 
+  function toHoursAndMinutes(totalSeconds) {
+    let formattedDate = ''
+    if (totalSeconds) {
+      formattedDate = formatRelative(new Date(totalSeconds * 1000), new Date())
 
+      formattedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
+    }
+
+    return formattedDate;
+  }
+
+  const notificationContent = (
+    <List
+      style={{ width: "30vw" }}
+      pagination={{
+        position: "bottom",
+        align: "center",
+        pageSize: 5
+      }}
+      size="small"
+      dataSource={newPost}
+      renderItem={(item, index) => (
+        <List.Item
+          className="list-item-notifications"
+          onClick={() => navigate(`/news/${item.id}`)}
+          style={{
+            cursor: "pointer",
+            marginTop: 5,
+            position: "relative"
+          }}
+        >
+          <List.Item.Meta
+            avatar={
+              item.photoOwner ? <Avatar src={item.photoOwner} /> : <Avatar>{item.emailOwner.charAt(3).toUpperCase()}</Avatar>
+            }
+            title={<div>{item.title}</div>}
+            description={<div>
+              <div>{extractContent(item.content).slice(0, 100).length === 100 ? `${extractContent(item.content).slice(0, 100)}...` : `${extractContent(item.content)}`}</div>
+              <div style={{
+                fontSize: 10,
+                border: ".5px solid gray",
+                borderRadius: 20,
+                paddingLeft: 10,
+                paddingRight: 10,
+                color: "gray",
+                width: "fit-content",
+                float: "right"
+              }}
+              >
+                {toHoursAndMinutes(item.timestamp.seconds)}
+              </div>
+            </div>}
+          />
+
+        </List.Item>
+      )}
+    />
+  )
+
+  function extractContent(s) {
+    var span = document.createElement('span');
+    span.innerHTML = s;
+    return span.textContent || span.innerText;
+  };
 
   const handleCancelEditAvatar = () => setPreviewOpenEditAvatar(false);
   const handlePreviewEditAvatar = async (file) => {
@@ -521,6 +556,7 @@ const Header = () => {
     let data = await response.json();
     setCurrentLocation(`${data.address.road}, ${data.address.suburb}, ${data.address.city}, ${data.address.country}`)
   };
+
 
   return (
     <div className="header-container">
@@ -736,17 +772,22 @@ const Header = () => {
         <div className="icon-btn-container">
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
         </div>
-        <Badge
-          className="icon-btn-notification"
-          count={newPost.length}
-          size="default"
-          overflowCount={9}
-          onClick={() => setNewPost([])}
-        >
-          <Avatar shape="circle" size="default">
-            {<BellOutlined style={{ color: "black", fontSize: 18 }} />}
-          </Avatar>
-        </Badge>
+        <Popover title="Notifications" content={notificationContent} trigger="click" getPopupContainer={trigger => trigger.parentElement}>
+          <Badge
+            className="icon-btn-notification"
+            count={notificationCount > 0 ? notificationCount : 0}
+            size="default"
+            overflowCount={9}
+            onClick={() => {
+              setNotificationCount(0)
+              countCurrentNews.current = countNewNews.current
+            }}
+          >
+            <Avatar shape="circle" size="default">
+              <BellOutlined style={{ color: "black", fontSize: 18 }} />
+            </Avatar>
+          </Badge>
+        </Popover>
         <Dropdown
           menu={{
             items,

@@ -94,7 +94,7 @@ export default function NewsDetails() {
                 <SideMenu />
                 <div className="App-Content-Main" style={{ paddingLeft: 40, paddingRight: 40, paddingTop: 20, paddingBottom: 20 }}>
                     <h1 style={{ color: "#B94A48" }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.title) }}></h1>
-                    {post.timestamp && <p style={{ color: "#666", fontSize: 13 }}>{dateFormat(post.timestamp.toDate(), "dddd, mmmm dS, yyyy - h:MM TT")}</p>}
+                    {post.timestamp && <p style={{ color: "#666", fontSize: 13 }}>{`${dateFormat(post.timestamp.toDate(), "dddd, mmmm dS, yyyy - h:MM TT")} (posted by ${post.ownerName})`}</p>}
                     <p dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}></p>
                     {
                         post.file ?
