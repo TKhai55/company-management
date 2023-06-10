@@ -17,6 +17,7 @@ import NewsDetails from "./Views/News/NewsDetail/NewsDetails";
 import ManageCustomers from "./Views/Manage Customers/ManageCustomers";
 import ManageStorage from "./Views/Manage Storage/ManageStorage";
 import Transaction from "./Views/Transaction/Transaction";
+import MakePlan from "./Views/Make Plan/MakePlan";
 import MyPosts from "./Views/components/Header/MyPosts/MyPosts";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
           <Route path="/managecustomers" element={<ManageCustomers />} />
           <Route path="/managestorage" element={<ManageStorage />} />
           <Route path="/transaction" element={<Transaction />} />
+          <Route path="/makeplan" element={<MakePlan />} />
           <Route path="/video" element={<JitsiMeet />} />
         </Routes>
       </MenuProvider>

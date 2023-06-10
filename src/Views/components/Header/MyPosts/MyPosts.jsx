@@ -1,37 +1,52 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc, where } from 'firebase/firestore'
-import { FloatButton, Form, Input, List, Modal, Space, message } from 'antd'
-import { DeleteOutlined, FormOutlined } from '@ant-design/icons'
-import "./MyPosts.css"
-import ReactQuill from 'react-quill'
-import Header from '../Header'
-import SideMenu from '../../SideMenu/SideMenu'
-import { AuthContext } from '../../Context/AuthProvider'
-import { db } from '../../../../Models/firebase/config'
-import DeleteModal from '../../Modals/ModalDelete'
+import React, { useContext, useEffect, useState } from "react";
+import Header from "../components/Header/Header";
+import SideMenu from "../components/SideMenu/SideMenu";
+import { AuthContext } from "../components/Context/AuthProvider";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    updateDoc,
+    where,
+} from "firebase/firestore";
+import { db } from "../../Models/firebase/config";
+import { FloatButton, Form, Input, List, Modal, Space, message } from "antd";
+import { DeleteOutlined, FormOutlined } from "@ant-design/icons";
+import "./MyPosts.css";
+import DeleteModal from "../components/Modals/ModalDelete";
+import ReactQuill from "react-quill";
 
 export default function MyPosts() {
-    const { user: { uid } } = useContext(AuthContext)
-    const [formEditPost] = Form.useForm()
-    const [myPosts, setMyPosts] = useState([])
-    const [onDeleteModalOpen, setOnDeleteModalOpen] = useState(false)
-    const [onEditPostModalOpen, setOnEditPostModalOpen] = useState(false)
-    const [titlePost, setTitlePost] = useState("")
-    const [contentPost, setContentPost] = useState("")
-    const [searchText, setSearchText] = useState("")
-    const [idDeletedItem, setIdDeletedItem] = useState("")
-    const [editedItem, setEditedItem] = useState("")
+    const {
+        user: { uid },
+    } = useContext(AuthContext);
+    const [formEditPost] = Form.useForm();
+    const [myPosts, setMyPosts] = useState([]);
+    const [onDeleteModalOpen, setOnDeleteModalOpen] = useState(false);
+    const [onEditPostModalOpen, setOnEditPostModalOpen] = useState(false);
+    const [titlePost, setTitlePost] = useState("");
+    const [contentPost, setContentPost] = useState("");
+    const [searchText, setSearchText] = useState("");
+    const [idDeletedItem, setIdDeletedItem] = useState("");
+    const [editedItem, setEditedItem] = useState("");
 
     useEffect(() => {
-        const q = query(collection(db, "posts"), where("owner", "==", uid), orderBy("timestamp", "desc"));
+        const q = query(
+            collection(db, "posts"),
+            where("owner", "==", uid),
+            orderBy("timestamp", "desc")
+        );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const updatedNews = [];
-            let news = {}
+            let news = {};
 
             snapshot.docChanges().forEach((change) => {
                 const data = change.doc.data();
-                news = { id: change.doc.id, ...data }
+                news = { id: change.doc.id, ...data };
                 if (change.type === "modified") {
                     news.isNew = true;
                 }
@@ -40,10 +55,10 @@ export default function MyPosts() {
             setMyPosts((prevNews) => [...updatedNews, ...prevNews]);
         });
         return () => unsubscribe();
-    }, [uid])
+    }, [uid]);
 
     const IconText = ({ icon, text, onClick, style }) => (
-        <Space style={style} onClick={onClick} className='icontext-button'>
+        <Space style={style} onClick={onClick} className="icontext-button">
             {React.createElement(icon)}
             {text}
         </Space>
@@ -98,43 +113,46 @@ export default function MyPosts() {
     };
 
     function extractContent(s) {
-        var span = document.createElement('span');
+        var span = document.createElement("span");
         span.innerHTML = s;
         return span.textContent || span.innerText;
-    };
+    }
 
     function handleEditPost(item) {
-        setOnEditPostModalOpen(true)
-        setTitlePost(item.title)
-        setContentPost(item.content)
-        setEditedItem(item.id)
+        setOnEditPostModalOpen(true);
+        setTitlePost(item.title);
+        setContentPost(item.content);
+        setEditedItem(item.id);
     }
 
     function handleShowModalDeletePost(item) {
-        setIdDeletedItem(item.id)
-        setOnDeleteModalOpen(true)
+        setIdDeletedItem(item.id);
+        setOnDeleteModalOpen(true);
     }
 
     async function handleDeletePost() {
-        await deleteDoc(doc(db, "posts", idDeletedItem))
-        setOnDeleteModalOpen(false)
-        setMyPosts(prevNews => prevNews.filter(post => post.id !== idDeletedItem));
-        message.success("Delete post successfully!")
+        await deleteDoc(doc(db, "posts", idDeletedItem));
+        setOnDeleteModalOpen(false);
+        setMyPosts((prevNews) =>
+            prevNews.filter((post) => post.id !== idDeletedItem)
+        );
+        message.success("Delete post successfully!");
     }
 
     async function onOKEditPostModal() {
         const postRef = doc(db, "posts", editedItem);
         await updateDoc(postRef, {
             title: titlePost,
-            content: contentPost
-        }).then(async () => {
-            await message.success("Update post successfully!")
-            setOnEditPostModalOpen(false)
-            window.location.reload()
-        }).catch(err => {
-            message.error(err.message)
+            content: contentPost,
         })
-
+            .then(async () => {
+                await message.success("Update post successfully!");
+                setOnEditPostModalOpen(false);
+                window.location.reload();
+            })
+            .catch((err) => {
+                message.error(err.message);
+            });
     }
 
     return (
@@ -142,16 +160,34 @@ export default function MyPosts() {
             <Header />
             <div className="App-Content-container">
                 <SideMenu />
-                <div className="App-Content-Main" style={{ paddingLeft: 40, paddingRight: 40, paddingTop: 20, paddingBottom: 20 }}>
-                    <DeleteModal open={onDeleteModalOpen} onCancel={() => setOnDeleteModalOpen(false)} onOk={handleDeletePost} />
-                    <Modal centered width={"85vw"} title="Edit Post" open={onEditPostModalOpen} onCancel={() => setOnEditPostModalOpen(false)} onOk={onOKEditPostModal}>
-                        <Form
-                            {...layout}
-                            name="Edit Post"
-                            form={formEditPost}
-                        >
+                <div
+                    className="App-Content-Main"
+                    style={{
+                        paddingLeft: 40,
+                        paddingRight: 40,
+                        paddingTop: 20,
+                        paddingBottom: 20,
+                    }}
+                >
+                    <DeleteModal
+                        open={onDeleteModalOpen}
+                        onCancel={() => setOnDeleteModalOpen(false)}
+                        onOk={handleDeletePost}
+                    />
+                    <Modal
+                        centered
+                        width={"85vw"}
+                        title="Edit Post"
+                        open={onEditPostModalOpen}
+                        onCancel={() => setOnEditPostModalOpen(false)}
+                        onOk={onOKEditPostModal}
+                    >
+                        <Form {...layout} name="Edit Post" form={formEditPost}>
                             <Form.Item label="Title">
-                                <Input value={titlePost} onChange={e => setTitlePost(e.target.value)} />
+                                <Input
+                                    value={titlePost}
+                                    onChange={(e) => setTitlePost(e.target.value)}
+                                />
                             </Form.Item>
                             <Form.Item label="Content">
                                 <ReactQuill
@@ -164,20 +200,22 @@ export default function MyPosts() {
                             </Form.Item>
                         </Form>
                     </Modal>
-                    <div style={{
-                        marginLeft: -40,
-                        paddingLeft: 40,
-                        paddingBottom: "1vh",
-                        position: "fixed",
-                        height: "16vh",
-                        width: "100%",
-                        top: 0,
-                        zIndex: 100,
-                        backgroundColor: "white",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "flex-end"
-                    }}>
+                    <div
+                        style={{
+                            marginLeft: -40,
+                            paddingLeft: 40,
+                            paddingBottom: "1vh",
+                            position: "fixed",
+                            height: "16vh",
+                            width: "100%",
+                            top: 0,
+                            zIndex: 100,
+                            backgroundColor: "white",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "flex-end",
+                        }}
+                    >
                         <Input.Search
                             style={{
                                 width: "50%",
@@ -193,33 +231,57 @@ export default function MyPosts() {
                         style={{
                             marginTop: "5vh",
                         }}
-                        itemLayout='vertical'
-                        size='large'
-                        dataSource={myPosts
-                            .filter(
-                                (news) =>
-                                    news.title.toLowerCase().includes(searchText.toLowerCase()) ||
-                                    news.content.toLowerCase().includes(searchText.toLowerCase())
-                            )}
-                        renderItem={item => (
+                        itemLayout="vertical"
+                        size="large"
+                        dataSource={myPosts.filter(
+                            (news) =>
+                                news.title.toLowerCase().includes(searchText.toLowerCase()) ||
+                                news.content.toLowerCase().includes(searchText.toLowerCase())
+                        )}
+                        renderItem={(item) => (
                             <List.Item
                                 key={item.title}
                                 actions={[
-                                    <IconText onClick={() => handleEditPost(item)} icon={FormOutlined} text="Edit" style={{ color: "#73BBC9", border: "1px solid #73BBC9", padding: 3, borderRadius: 5 }} />,
-                                    <IconText onClick={() => handleShowModalDeletePost(item)} icon={DeleteOutlined} text="Delete" style={{ color: "#E76161", border: "1px solid #E76161", padding: 3, borderRadius: 5 }} />
+                                    <IconText
+                                        onClick={() => handleEditPost(item)}
+                                        icon={FormOutlined}
+                                        text="Edit"
+                                        style={{
+                                            color: "#73BBC9",
+                                            border: "1px solid #73BBC9",
+                                            padding: 3,
+                                            borderRadius: 5,
+                                        }}
+                                    />,
+                                    <IconText
+                                        onClick={() => handleShowModalDeletePost(item)}
+                                        icon={DeleteOutlined}
+                                        text="Delete"
+                                        style={{
+                                            color: "#E76161",
+                                            border: "1px solid #E76161",
+                                            padding: 3,
+                                            borderRadius: 5,
+                                        }}
+                                    />,
                                 ]}
                             >
                                 <List.Item.Meta
-                                    title={<a style={{ fontWeight: "bold" }} href={`/news/${item.id}`}>{item.title}</a>}
+                                    title={
+                                        <a style={{ fontWeight: "bold" }} href={`/news/${item.id}`}>
+                                            {item.title}
+                                        </a>
+                                    }
                                 />
-                                {extractContent(item.content).slice(0, 260).length === 260 ? `${extractContent(item.content).slice(0, 260)} ...` : `${extractContent(item.content)}`}
+                                {extractContent(item.content).slice(0, 260).length === 260
+                                    ? `${extractContent(item.content).slice(0, 260)} ...`
+                                    : `${extractContent(item.content)}`}
                             </List.Item>
                         )}
                     />
                     <FloatButton.BackTop />
-
                 </div>
             </div>
         </div>
-    )
+    );
 }
