@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import "./Header.css";
 import logo from "../../../images/main logo.png";
 import { BsCameraVideo, BsChatDots } from "react-icons/bs";
@@ -50,7 +50,6 @@ const getBase64 = (file) =>
     reader.onerror = (error) => reject(error);
   });
 
-
 const Header = () => {
   const [currentUser, setCurrentUser] = useState({});
   const { updateRoleID } = useContext(MenuContext);
@@ -87,6 +86,15 @@ const Header = () => {
     setIsModalEditProfileOpen(true);
   };
   const handleEditProfileOk = async () => {
+    const updateList = []
+    const q = query(collection(db, "posts"), where("owner", "==", uid));
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      updateList.push(doc.id)
+    });
+
+
     if (selectedAvatarFile === null) {
       const currentUserRef = doc(db, "users", uid);
       await updateDoc(currentUserRef, {
@@ -98,8 +106,16 @@ const Header = () => {
       updateProfile(auth.currentUser, {
         displayName: editableDisplayName,
       })
+      updateList.forEach(id => {
+        const postRef = doc(db, "posts", id)
+
+        updateDoc(postRef, {
+          ownerName: editableDisplayName
+        })
+      })
       setIsModalEditProfileOpen(false);
-      message.success("Update profile successfully!")
+      await message.success("Update profile successfully!")
+      await window.reload()
     } else {
       const avatarRef = ref(storage, `avatar/${uid}`)
       uploadBytes(avatarRef, selectedAvatarFile).then((snapshot) => {
@@ -116,8 +132,17 @@ const Header = () => {
             displayName: editableDisplayName,
             photoURL: url,
           })
+          updateList.forEach(id => {
+            const postRef = doc(db, "posts", id)
+
+            updateDoc(postRef, {
+              ownerName: editableDisplayName,
+              photoOwner: url
+            })
+          })
           setIsModalEditProfileOpen(false);
-          message.success("Update profile successfully!")
+          await message.success("Update profile successfully!")
+          await window.reload()
         })
       })
     }
@@ -246,9 +271,14 @@ const Header = () => {
     return () => unsubscribe()
   }, [uid])
 
-  let countCurrentNews = useRef(null)
-  let countNewNews = useRef(null)
-  const [notificationCount, setNotificationCount] = useState(0)
+  // let countCurrentNews = useRef(null)
+  let [countCurrentNews, setCountCurrentNews] = useState(0)
+  // let countNewNews = useRef(null)
+  let [countNewNews, setCountNewNews] = useState(0)
+  // countNewNews.current = 0
+  let notificationCount = useRef(0)
+  // const [notificationCount, setNotificationCount] = useState(countNewNews - countCurrentNews)
+
 
   useEffect(() => {
     async function getCountPosts() {
@@ -257,7 +287,7 @@ const Header = () => {
           (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
           where("scope", "==", department),
         ))
-      countCurrentNews.current = snapshot.data().count
+      setCountCurrentNews(snapshot.data().count)
     }
 
     getCountPosts()
@@ -273,10 +303,9 @@ const Header = () => {
         post.push(doc.data());
       });
       setNewPost(post)
-      countNewNews.current = querySnapshot.size
-      setNotificationCount(countNewNews.current - countCurrentNews.current)
+      setCountNewNews(querySnapshot.size)
     });
-  }, [])
+  }, [uid, department])
 
   useEffect(() => {
     async function getDepartmentName() {
@@ -774,13 +803,14 @@ const Header = () => {
         </div>
         <Popover title="Notifications" content={notificationContent} trigger="click" getPopupContainer={trigger => trigger.parentElement}>
           <Badge
+            dot={countNewNews - countCurrentNews > 0 ? true : false}
             className="icon-btn-notification"
-            count={notificationCount > 0 ? notificationCount : 0}
+            // count={countNewNews - countCurrentNews > 0 ? countNewNews - countCurrentNews : 0}
             size="default"
-            overflowCount={9}
+            // overflowCount={9}
             onClick={() => {
-              setNotificationCount(0)
-              countCurrentNews.current = countNewNews.current
+              setCountCurrentNews(0)
+              setCountNewNews(0)
             }}
           >
             <Avatar shape="circle" size="default">
