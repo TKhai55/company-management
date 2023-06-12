@@ -85,12 +85,13 @@ export default function Step1({ onDataUpload, handleIsFileUploaded }) {
         "Employee's name must not contain special characters or numbers."
       );
     } else {
+      const employeeUsername = `${roleArray[keyRole].key}.${employeeName
+        .split(" ")
+        .join("")
+        .toLowerCase()}@gmail.com`
       await createUserWithEmailAndPassword(
         auth,
-        `${roleArray[keyRole].key}.${employeeName
-          .split(" ")
-          .join("")
-          .toLowerCase()}@gmail.com`,
+        employeeUsername,
         employeePassword
       )
         .then(async (userCredential) => {
