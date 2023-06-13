@@ -31,6 +31,7 @@
     "react-router-dom": "^6.11.1",
     "react-scripts": "5.0.1",
     "react-web-vector-icons": "^1.0.2",
+    "source-map-loader": "^4.0.1",
     "styled-components": "^6.0.0-rc.1",
     "web-vitals": "^2.1.4",
     "world_countries_lists": "^2.8.1",
