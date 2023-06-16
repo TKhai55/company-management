@@ -19,8 +19,8 @@ import ManageStorage from "./Views/Manage Storage/ManageStorage";
 import Transaction from "./Views/Transaction/Transaction";
 import MakePlan from "./Views/Make Plan/MakePlan";
 import MyPosts from "./Views/components/Header/MyPosts/MyPosts";
-import ReportsForManager from "./Views/Reports/ReportsForManager";
-import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal";
+import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
+import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
 
 function App() {
   return (
