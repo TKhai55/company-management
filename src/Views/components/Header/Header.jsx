@@ -22,7 +22,7 @@ import {
   DatePicker,
   List,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, TeamOutlined } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
@@ -41,6 +41,7 @@ import 'dayjs/locale/zh-cn';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 import { formatRelative } from "date-fns";
+import MyColleagues from "./MyColleaguesModal/MyColleaguesModal";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -72,15 +73,12 @@ const Header = () => {
     isAuthenticated,
     user: { uid, email, displayName, role, department, photoURL, phoneNumber, location }
   } = useContext(AuthContext);
-  const [fileList, setFileList] = useState([{
-    // uid: '-1',
-    // name: 'image.png',
-    // status: 'done',
-    // url: photoURL,
-  }]);
+  const [fileList, setFileList] = useState([{}]);
   const [editableDisplayName, setEditableDisplayName] = useState(displayName)
   const [phoneNumberCurrentUser, setPhoneNumberCurrentUser] = useState(phoneNumber)
   const [currentLocation, setCurrentLocation] = useState(location)
+  const [openModalMyColleagues, setOpenModalMyColleagues] = useState(false)
+  const [colleagues, setColleagues] = useState([])
 
   const showModalEditProfile = () => {
     setIsModalEditProfileOpen(true);
@@ -174,7 +172,14 @@ const Header = () => {
       icon: <EditOutlined />,
     },
     {
-      key: "3",
+      key: '3',
+      label: (
+        <div onClick={() => setOpenModalMyColleagues(true)}>My Colleagues</div>
+      ),
+      icon: <TeamOutlined />,
+    },
+    {
+      key: "4",
       label: (
         <div
           onClick={() => navigate("/myposts")}
@@ -238,9 +243,6 @@ const Header = () => {
     "image",
     "video",
   ];
-  // const handleEditorChange = (value) => {
-  //   setValue(value);
-  // };
 
   const handleClickChatBox = () => {
     if (isAuthenticated) {
@@ -271,14 +273,8 @@ const Header = () => {
     return () => unsubscribe()
   }, [uid])
 
-  // let countCurrentNews = useRef(null)
   let [countCurrentNews, setCountCurrentNews] = useState(0)
-  // let countNewNews = useRef(null)
   let [countNewNews, setCountNewNews] = useState(0)
-  // countNewNews.current = 0
-  let notificationCount = useRef(0)
-  // const [notificationCount, setNotificationCount] = useState(countNewNews - countCurrentNews)
-
 
   useEffect(() => {
     async function getCountPosts() {
@@ -330,6 +326,7 @@ const Header = () => {
         return data;
       });
       setOptionsColleague(docs);
+      setColleagues(docs)
     })();
   }, []);
 
@@ -586,9 +583,9 @@ const Header = () => {
     setCurrentLocation(`${data.address.road}, ${data.address.suburb}, ${data.address.city}, ${data.address.country}`)
   };
 
-
   return (
     <div className="header-container">
+      <MyColleagues isModalOpen={openModalMyColleagues} handleCancel={() => setOpenModalMyColleagues(false)} departmentID={department} userID={uid} colleaguesList={colleagues} />
       <Modal
         open={previewOpenEditAvatar} title={previewTitleEditAvatar} footer={null} onCancel={handleCancelEditAvatar}
       >

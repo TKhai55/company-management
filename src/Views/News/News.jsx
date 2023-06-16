@@ -44,7 +44,6 @@ const News = () => {
 
       snapshot.docChanges().forEach((change) => {
         const data = change.doc.data();
-        console.log({ change })
         const timestamp = change.doc._document.createTime.timestamp.seconds
         news = { id: change.doc.id, ...data }
         if (change.type === "removed") {

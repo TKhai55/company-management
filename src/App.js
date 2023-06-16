@@ -19,6 +19,8 @@ import ManageStorage from "./Views/Manage Storage/ManageStorage";
 import Transaction from "./Views/Transaction/Transaction";
 import MakePlan from "./Views/Make Plan/MakePlan";
 import MyPosts from "./Views/components/Header/MyPosts/MyPosts";
+import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
+import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
           <Route path="/transaction" element={<Transaction />} />
           <Route path="/makeplan" element={<MakePlan />} />
           <Route path="/video" element={<JitsiMeet />} />
+          <Route path="/report/:idDepartment" element={<ReportsForManager />} />
+          <Route path="/report" element={<ReportsForPrincipal />} />
         </Routes>
       </MenuProvider>
     </AuthProvider>
