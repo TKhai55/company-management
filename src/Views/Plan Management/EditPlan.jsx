@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
-import "./MakePlan.css";
+import "../Make Plan/MakePlan.css";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -20,11 +20,14 @@ import {
 } from "antd";
 import { AuthContext } from "../components/Context/AuthProvider";
 import { GetDepartmentName } from "../../Controls/ManageDepartment";
-import { GetEmployee, AddPlanData } from "../../Controls/MakePlanController";
+import { GetEmployee } from "../../Controls/MakePlanController";
+import { EditPlanData } from "../../Controls/PlanManagement";
 import { GetProduct } from "../../Controls/TransactionController";
-import { GetPlan } from "../../Controls/PlanManagement";
+import { GetPlanByID } from "../../Controls/PlanManagement";
+import { useParams } from "react-router-dom";
+import moment from "moment";
 
-const MakePlan = () => {
+const EditPlan = () => {
   // create variables
   const columns = [
     {
@@ -42,13 +45,13 @@ const MakePlan = () => {
       render: (text, record, index) => (
         <Select
           style={{ width: "15vw" }}
+          value={formValue.planDetails[index].productName}
           placeholder="Product"
           options={product.map((option) => ({
             label: option.name,
             value: option.id,
           }))}
           labelInValue
-          value={formValue.planDetails[index].productName}
           onChange={(option) => {
             handlePlanDetailsChange(index, "productID", option.value);
             handlePlanDetailsChange(index, "productName", option.label);
@@ -61,6 +64,7 @@ const MakePlan = () => {
       dataIndex: "type",
       render: (text, record, index) => (
         <Select
+          value={formValue.planDetails[index].typeName}
           placeholder="Type"
           style={{ width: "10vw" }}
           options={[
@@ -68,7 +72,6 @@ const MakePlan = () => {
             { value: false, label: "Import" },
           ]}
           labelInValue
-          value={formValue.planDetails[index].typeName}
           onChange={(option) => {
             handlePlanDetailsChange(index, "typeID", option.value);
             handlePlanDetailsChange(index, "typeName", option.label);
@@ -84,6 +87,7 @@ const MakePlan = () => {
       render: (text, record, index) => (
         <InputNumber
           min={0}
+          value={formValue.planDetails[index].profit}
           decimalSeparator
           placeholder="Profit"
           style={{ width: "100%" }}
@@ -92,7 +96,6 @@ const MakePlan = () => {
               ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "đ"
               : null
           }
-          value={formValue.planDetails[index].profit}
           parser={(value) => value.replace(/\đ\s?|(,*)/g, "")}
           onChange={(e) => {
             handlePlanDetailsChange(index, "profit", e);
@@ -111,6 +114,7 @@ const MakePlan = () => {
         ) : null,
     },
   ];
+  const { planID } = useParams();
   const {
     user: { department, uid, role, displayName, photoURL },
   } = useContext(AuthContext);
@@ -121,15 +125,17 @@ const MakePlan = () => {
   const [departmentName, setDepartmentName] = useState("");
   const employee = GetEmployee();
   const result = groupBy(employee, (option) => option.role, uid);
+
   const [tableData, setTableData] = useState([]);
   const [product, setProduct] = useState([]);
+  const [plan, setPlan] = useState([]);
   const [formValue, setFormValue] = useState({
     employeeID: uid,
     department: department,
     role: role,
     name: displayName,
     photo: photoURL,
-    title: null,
+    title: plan.title,
     start: null,
     end: null,
     planDetails: [
@@ -146,7 +152,6 @@ const MakePlan = () => {
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
-
   // useEffect
   useEffect(() => {
     if (initialRender && tableData.length === 0) {
@@ -157,6 +162,7 @@ const MakePlan = () => {
   useEffect(() => {
     getName();
     fetchProduct();
+    fetchPlan();
   }, []);
   useEffect(() => {
     if (departmentName) {
@@ -166,10 +172,48 @@ const MakePlan = () => {
       }));
     }
   }, [departmentName]);
+  useEffect(() => {
+    if (plan && plan.title) {
+      form.setFieldsValue({ title: plan.title });
+      handleSelectChange("title", plan.title);
+    }
+    if (plan && plan.start) {
+      const startDate = new Date(
+        Number(plan.start.seconds) * 1000 +
+          Number(plan.start.nanoseconds) / 1000000
+      );
+      const mStart = moment(startDate);
+      form.setFieldsValue({ start: mStart });
+      handleSelectChange("start", startDate);
+    }
+
+    if (plan && plan.end) {
+      const endDate = new Date(
+        Number(plan.end.seconds) * 1000 + Number(plan.end.nanoseconds) / 1000000
+      );
+      const mEnd = moment(endDate);
+      form.setFieldsValue({ end: mEnd });
+      handleSelectChange("end", endDate);
+    }
+    setTableData(plan.planDetails);
+    handleSelectChange("planDetails", plan.planDetails);
+    if (plan && plan.participants) {
+      const defaultValues = plan.participants.map((detail) => ({
+        value: detail.participantID,
+        label: detail.displayName,
+      }));
+      form.setFieldsValue({ participants: defaultValues });
+      handleSelectChange("participants", plan.participants);
+    }
+  }, [plan]);
   // Other related functions
   const fetchProduct = async () => {
     const data = await GetProduct();
     setProduct(data);
+  };
+  const fetchPlan = async () => {
+    const data = await GetPlanByID(planID);
+    setPlan(data);
   };
   const getName = async () => {
     const data = await GetDepartmentName(department);
@@ -199,31 +243,6 @@ const MakePlan = () => {
   }
 
   // handle function
-  const handleReset = () => {
-    form.resetFields();
-    setTableData([{}]);
-    setFormValue({
-      employeeID: uid,
-      department: department,
-      role: role,
-      name: displayName,
-      photo: photoURL,
-      title: null,
-      start: null,
-      end: null,
-      planDetails: [
-        {
-          productID: null,
-          productName: null,
-          typeID: null,
-          typeName: null,
-          profit: 0,
-        },
-      ],
-      participants: [],
-      isConfirm: false,
-    });
-  };
   const handleOk = () => {
     form.validateFields().then((values) => {
       if (
@@ -241,9 +260,8 @@ const MakePlan = () => {
       }
       setConfirmLoading(true);
       setTimeout(async () => {
-        const documentID = await AddPlanData(formValue);
-        if (documentID) message.success("Create plan successfully!");
-        handleReset();
+        await EditPlanData(planID, formValue);
+        message.success("Edit plan successfully!");
         setIsModalVisible(false);
         setConfirmLoading(false);
       }, 1000);
@@ -294,6 +312,7 @@ const MakePlan = () => {
       planDetails: newPlanDetails,
     }));
   };
+
   const handleDateTimeChange = (field, date) => {
     if (date) {
       const timestamp = date.valueOf(); // Chuyển đổi thành timestamp
@@ -323,7 +342,7 @@ const MakePlan = () => {
   };
 
   const handleDeselect = (value) => {
-    console.log(value);
+    // console.log(value);
     const arrayInput = {
       participantID: value.value,
       displayName: value.label,
@@ -335,6 +354,7 @@ const MakePlan = () => {
     );
     formValue.participants.splice(index, 1);
   };
+
   return (
     <div className="App-container">
       <Header />
@@ -355,6 +375,7 @@ const MakePlan = () => {
                     label="Title"
                     name="title"
                     rules={[{ required: true, message: "Missing title" }]}
+                    // initialValue={plan.title}
                   >
                     <Input
                       style={{ width: "52%", marginLeft: "2.5vw" }}
@@ -449,15 +470,6 @@ const MakePlan = () => {
               <div className="Btn-container">
                 <Space>
                   <Button
-                    type="dashed"
-                    style={{ color: "#FF2222", fontWeight: "400" }}
-                    onClick={() => {
-                      handleReset();
-                    }}
-                  >
-                    Reset
-                  </Button>
-                  <Button
                     type="primary"
                     style={{ backgroundColor: "#34CE69", fontWeight: "400" }}
                     onClick={() => {
@@ -465,7 +477,7 @@ const MakePlan = () => {
                       // console.log(formValue);
                     }}
                   >
-                    Create Plan
+                    Edit Plan
                   </Button>
                 </Space>
                 <Modal
@@ -475,7 +487,7 @@ const MakePlan = () => {
                   confirmLoading={confirmLoading}
                   onCancel={handleCancel}
                 >
-                  Are you sure to create this plan ?
+                  Are you sure to edit this plan ?
                 </Modal>
               </div>
             </div>
@@ -490,4 +502,4 @@ const MakePlan = () => {
   );
 };
 
-export default MakePlan;
+export default EditPlan;

@@ -14,6 +14,8 @@ import {
   faWarehouse,
   faRightLeft,
   faFileContract,
+  faPaste,
+  faUsersRectangle,
 } from "@fortawesome/free-solid-svg-icons";
 
 const SideMenuController = (roleID) => {
@@ -86,6 +88,11 @@ const SideMenuController = (roleID) => {
       return <FontAwesomeIcon icon={faWarehouse} />;
     if (label === "Transaction") return <FontAwesomeIcon icon={faRightLeft} />;
     if (label === "Make Plan") return <FontAwesomeIcon icon={faFileContract} />;
+    if (label === "Plan Management") return <FontAwesomeIcon icon={faPaste} />;
+    if (label === "Department Plan")
+      return <FontAwesomeIcon icon={faUsersRectangle} />;
+    if (label === "Company Plan")
+      return <FontAwesomeIcon icon={faUsersRectangle} />;
     return null;
   };
 

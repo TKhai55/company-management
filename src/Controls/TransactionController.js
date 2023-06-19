@@ -4,7 +4,10 @@ import { getDocs, collection, query, where } from "firebase/firestore";
 const GetEmployee = () => {
   const colRef = collection(db, "users");
   const [functions, setFunctions] = useState([]);
-  const q = query(colRef, where("role", "in", ["Manager", "Employee"]));
+  const q = query(
+    colRef,
+    where("role", "in", ["Manager", "Employee", "Storage Manager"])
+  );
 
   const fetchData = async () => {
     const querySnapshot = await getDocs(q);

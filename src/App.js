@@ -19,6 +19,10 @@ import ManageStorage from "./Views/Manage Storage/ManageStorage";
 import Transaction from "./Views/Transaction/Transaction";
 import MakePlan from "./Views/Make Plan/MakePlan";
 import MyPosts from "./Views/components/Header/MyPosts/MyPosts";
+import PlanManagement from "./Views/Plan Management/PlanManagement";
+import EditPlan from "./Views/Plan Management/EditPlan";
+import DepartmentPlan from "./Views/Department Plan/DepartmentPlan";
+import CompanyPlan from "./Views/Company Plan/CompanyPlan";
 import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
 import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
 
@@ -43,6 +47,10 @@ function App() {
           <Route path="/managestorage" element={<ManageStorage />} />
           <Route path="/transaction" element={<Transaction />} />
           <Route path="/makeplan" element={<MakePlan />} />
+          <Route path="/planmanagement" element={<PlanManagement />} />
+          <Route path="/planmanagement/:planID" element={<EditPlan />} />
+          <Route path="/departmentplan" element={<DepartmentPlan />} />
+          <Route path="/companyplan" element={<CompanyPlan />} />
           <Route path="/video" element={<JitsiMeet />} />
           <Route path="/report/:idDepartment" element={<ReportsForManager />} />
           <Route path="/report" element={<ReportsForPrincipal />} />
