@@ -1,0 +1,19 @@
+.CompanyPlan-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+.CompanyPlan-container .Tabs-container {
+  width: 90%;
+  /* height: 100%; */
+  margin-top: 3vh;
+}
+.Tabs-container .EmployeePlan-container {
+  /* color: red; */
+  /* height: 100%; */
+
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,68 @@
+.DepartmentPlan-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+.DepartmentPlan-container .Tabs-container {
+  width: 90%;
+  /* height: 100%; */
+  margin-top: 3vh;
+}
+.Tabs-container .EmployeePlan-container {
+  /* color: red; */
+  /* height: 100%; */
+
+  display: flex;
+  flex-direction: column;
+}
+.EmployeePlan-container .CardList-container {
+  margin-top: 3vh;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(25vw, 1fr)
+  ); /* Xác định kích thước cột tối thiểu và tối đa của các card */
+  gap: 2vw;
+}
+.EmployeePlan-container .empty-container {
+  display: flex;
+  height: 50vh;
+  justify-content: center;
+  align-items: center;
+}
+.EmployeePlan-container .Card-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1vh;
+}
+.Tabs-container .CreateDP-container {
+  display: flex;
+  flex-direction: column;
+}
+.CreateDP-container .btn-merge-container {
+  margin-top: 2vh;
+  margin-bottom: 4vh;
+}
+.Tabs-container .ManageDepartmentPlan-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.ManageDepartmentPlan-container .planList-container {
+  margin-top: 5vh;
+  width: 100%;
+}
+.ManageDepartmentPlan-container .PlanFeatures-container {
+  margin-top: 3vh;
+  width: 100%;
+}
+.Empty-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

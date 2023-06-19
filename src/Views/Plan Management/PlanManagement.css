@@ -1,0 +1,21 @@
+.PlanManagement-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.PlanManagement-container .planList-container {
+  margin-top: 5vh;
+  width: 80%;
+}
+.PlanManagement-container .PlanFeatures-container {
+  margin-top: 8vh;
+  width: 80%;
+}
+.Empty-container {
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
