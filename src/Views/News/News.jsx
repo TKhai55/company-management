@@ -50,7 +50,17 @@ const News = () => {
           setNewsForCurrentUser(prevNews =>
             prevNews.filter(item => item.id !== news.id)
           );
-        } else {
+        } else if (change.type === "added") {
+          if (timestamp > startOfDaySeconds && timestamp < endOfDaySeconds) {
+            news.isNew = true;
+          }
+          if (news.timestamp) {
+            updatedNews.push(news);
+          }
+        } else if (change.type === "modified") {
+          setNewsForCurrentUser(prevNews =>
+            prevNews.filter(item => item.id !== change.doc.id)
+          );
           if (timestamp > startOfDaySeconds && timestamp < endOfDaySeconds) {
             news.isNew = true;
           }

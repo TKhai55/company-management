@@ -41,42 +41,10 @@ const Login = () => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        roleArray.map((role) => {
-          if (
-            user.email.startsWith("ad") &&
-            role.key.includes("ad") &&
-            isAuthenticated
-          ) {
-            updateRoleID(role.id);
-            navigate("/homepage", { state: { role: role.id } });
-          } else if (
-            user.email.startsWith("ep") &&
-            role.key.includes("ep") &&
-            isAuthenticated
-          ) {
-            updateRoleID(role.id);
-            navigate("/homepage", { state: { role: role.id } });
-          } else if (
-            user.email.startsWith("mn") &&
-            role.key.includes("mn") &&
-            isAuthenticated
-          ) {
-            updateRoleID(role.id);
-            navigate("/homepage", { state: { role: role.id } });
-          } else if (
-            user.email.startsWith("pc") &&
-            role.key.includes("pc") &&
-            isAuthenticated
-          ) {
-            updateRoleID(role.id);
-            navigate("/homepage", { state: { role: role.id } });
-          } else if (
-            user.email.startsWith("sm") &&
-            role.key.includes("sm") &&
-            isAuthenticated
-          ) {
-            updateRoleID(role.id);
-            navigate("/homepage", { state: { role: role.id } });
+        roleArray.forEach((role) => {
+          if (role.key === user.email.slice(0, 2) && isAuthenticated) {
+            updateRoleID(role.id)
+            navigate("/homepage", { state: { role: role.id } })
           }
         });
         return;

@@ -23,6 +23,9 @@ import PlanManagement from "./Views/Plan Management/PlanManagement";
 import EditPlan from "./Views/Plan Management/EditPlan";
 import DepartmentPlan from "./Views/Department Plan/DepartmentPlan";
 import CompanyPlan from "./Views/Company Plan/CompanyPlan";
+import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
+import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
+
 function App() {
   return (
     <AuthProvider>
@@ -49,6 +52,8 @@ function App() {
           <Route path="/departmentplan" element={<DepartmentPlan />} />
           <Route path="/companyplan" element={<CompanyPlan />} />
           <Route path="/video" element={<JitsiMeet />} />
+          <Route path="/report/:idDepartment" element={<ReportsForManager />} />
+          <Route path="/report" element={<ReportsForPrincipal />} />
         </Routes>
       </MenuProvider>
     </AuthProvider>

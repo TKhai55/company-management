@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import "./Header.css";
 import logo from "../../../images/main logo.png";
 import { BsCameraVideo, BsChatDots } from "react-icons/bs";
@@ -22,7 +22,7 @@ import {
   DatePicker,
   List,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, TeamOutlined } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
@@ -41,6 +41,7 @@ import 'dayjs/locale/zh-cn';
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 import { formatRelative } from "date-fns";
+import MyColleagues from "./MyColleaguesModal/MyColleaguesModal";
 
 const getBase64 = (file) =>
   new Promise((resolve, reject) => {
@@ -49,7 +50,6 @@ const getBase64 = (file) =>
     reader.onload = () => resolve(reader.result);
     reader.onerror = (error) => reject(error);
   });
-
 
 const Header = () => {
   const [currentUser, setCurrentUser] = useState({});
@@ -73,20 +73,26 @@ const Header = () => {
     isAuthenticated,
     user: { uid, email, displayName, role, department, photoURL, phoneNumber, location }
   } = useContext(AuthContext);
-  const [fileList, setFileList] = useState([{
-    // uid: '-1',
-    // name: 'image.png',
-    // status: 'done',
-    // url: photoURL,
-  }]);
+  const [fileList, setFileList] = useState([{}]);
   const [editableDisplayName, setEditableDisplayName] = useState(displayName)
   const [phoneNumberCurrentUser, setPhoneNumberCurrentUser] = useState(phoneNumber)
   const [currentLocation, setCurrentLocation] = useState(location)
+  const [openModalMyColleagues, setOpenModalMyColleagues] = useState(false)
+  const [colleagues, setColleagues] = useState([])
 
   const showModalEditProfile = () => {
     setIsModalEditProfileOpen(true);
   };
   const handleEditProfileOk = async () => {
+    const updateList = []
+    const q = query(collection(db, "posts"), where("owner", "==", uid));
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      updateList.push(doc.id)
+    });
+
+
     if (selectedAvatarFile === null) {
       const currentUserRef = doc(db, "users", uid);
       await updateDoc(currentUserRef, {
@@ -98,8 +104,16 @@ const Header = () => {
       updateProfile(auth.currentUser, {
         displayName: editableDisplayName,
       })
+      updateList.forEach(id => {
+        const postRef = doc(db, "posts", id)
+
+        updateDoc(postRef, {
+          ownerName: editableDisplayName
+        })
+      })
       setIsModalEditProfileOpen(false);
-      message.success("Update profile successfully!")
+      await message.success("Update profile successfully!")
+      await window.reload()
     } else {
       const avatarRef = ref(storage, `avatar/${uid}`)
       uploadBytes(avatarRef, selectedAvatarFile).then((snapshot) => {
@@ -116,8 +130,17 @@ const Header = () => {
             displayName: editableDisplayName,
             photoURL: url,
           })
+          updateList.forEach(id => {
+            const postRef = doc(db, "posts", id)
+
+            updateDoc(postRef, {
+              ownerName: editableDisplayName,
+              photoOwner: url
+            })
+          })
           setIsModalEditProfileOpen(false);
-          message.success("Update profile successfully!")
+          await message.success("Update profile successfully!")
+          await window.reload()
         })
       })
     }
@@ -149,7 +172,14 @@ const Header = () => {
       icon: <EditOutlined />,
     },
     {
-      key: "3",
+      key: '3',
+      label: (
+        <div onClick={() => setOpenModalMyColleagues(true)}>My Colleagues</div>
+      ),
+      icon: <TeamOutlined />,
+    },
+    {
+      key: "4",
       label: (
         <div
           onClick={() => navigate("/myposts")}
@@ -213,9 +243,6 @@ const Header = () => {
     "image",
     "video",
   ];
-  // const handleEditorChange = (value) => {
-  //   setValue(value);
-  // };
 
   const handleClickChatBox = () => {
     if (isAuthenticated) {
@@ -246,9 +273,8 @@ const Header = () => {
     return () => unsubscribe()
   }, [uid])
 
-  let countCurrentNews = useRef(null)
-  let countNewNews = useRef(null)
-  const [notificationCount, setNotificationCount] = useState(0)
+  let [countCurrentNews, setCountCurrentNews] = useState(0)
+  let [countNewNews, setCountNewNews] = useState(0)
 
   useEffect(() => {
     async function getCountPosts() {
@@ -257,7 +283,7 @@ const Header = () => {
           (where('scope', '==', "custom"), (where("customGroup", "array-contains", uid))),
           where("scope", "==", department),
         ))
-      countCurrentNews.current = snapshot.data().count
+      setCountCurrentNews(snapshot.data().count)
     }
 
     getCountPosts()
@@ -273,10 +299,9 @@ const Header = () => {
         post.push(doc.data());
       });
       setNewPost(post)
-      countNewNews.current = querySnapshot.size
-      setNotificationCount(countNewNews.current - countCurrentNews.current)
+      setCountNewNews(querySnapshot.size)
     });
-  }, [])
+  }, [uid, department])
 
   useEffect(() => {
     async function getDepartmentName() {
@@ -301,6 +326,7 @@ const Header = () => {
         return data;
       });
       setOptionsColleague(docs);
+      setColleagues(docs)
     })();
   }, []);
 
@@ -557,9 +583,9 @@ const Header = () => {
     setCurrentLocation(`${data.address.road}, ${data.address.suburb}, ${data.address.city}, ${data.address.country}`)
   };
 
-
   return (
     <div className="header-container">
+      <MyColleagues isModalOpen={openModalMyColleagues} handleCancel={() => setOpenModalMyColleagues(false)} departmentID={department} userID={uid} colleaguesList={colleagues} />
       <Modal
         open={previewOpenEditAvatar} title={previewTitleEditAvatar} footer={null} onCancel={handleCancelEditAvatar}
       >
@@ -774,13 +800,14 @@ const Header = () => {
         </div>
         <Popover title="Notifications" content={notificationContent} trigger="click" getPopupContainer={trigger => trigger.parentElement}>
           <Badge
+            dot={countNewNews - countCurrentNews > 0 ? true : false}
             className="icon-btn-notification"
-            count={notificationCount > 0 ? notificationCount : 0}
+            // count={countNewNews - countCurrentNews > 0 ? countNewNews - countCurrentNews : 0}
             size="default"
-            overflowCount={9}
+            // overflowCount={9}
             onClick={() => {
-              setNotificationCount(0)
-              countCurrentNews.current = countNewNews.current
+              setCountCurrentNews(0)
+              setCountNewNews(0)
             }}
           >
             <Avatar shape="circle" size="default">
