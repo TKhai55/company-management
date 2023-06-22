@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react'
 import Header from '../../components/Header/Header'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import "./ReportsForPrincipal.css"
-import { Card, Col, Row, Statistic } from 'antd';
+import { Card, Col, Divider, Row, Statistic } from 'antd';
 import BarChartImportAndExport from './BarChart/BarChart';
 import PieChartQuantityProducts from './PieChart/PieChart';
 import { ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../Models/firebase/config';
 import LineChart from './LineChart/LineChart';
+import { formatNumber } from '../../../Controls/ReportController'
+import CollapseOfProgressEachDepartment from './CollapseOfProgressEachDepartment/CollapseOfProgressEachDepartment';
+
 
 export default function ReportsForPrincipal() {
     const [transition, setTransition] = useState([])
@@ -36,34 +39,13 @@ export default function ReportsForPrincipal() {
         }
     });
 
-    function formatNumber(number) {
-        const billion = 1e9;
-        const million = 1e6;
-        const thousand = 1e3;
-
-        if (number >= billion) {
-            return (number / billion).toFixed(1) + 'B';
-        } else if (number >= million) {
-            return (number / million).toFixed(1) + 'M';
-        } else if (number >= thousand) {
-            return (number / thousand).toFixed(1) + 'K';
-        }
-
-        return number.toString();
-    }
     return (
         <div className="App-container">
             <Header />
             <div className="App-Content-container">
                 <SideMenu />
                 <div className="App-Content-Main">
-                    <div style={{
-                        width: "100%",
-                        height: 50,
-                        fontSize: 40,
-                        textAlign: "center",
-                        fontWeight: "bold"
-                    }}>Report for principal</div>
+                    <Divider orientation='left'>General Reports Information</Divider>
                     <Row>
                         <Col>
                             <BarChartImportAndExport />
@@ -115,6 +97,8 @@ export default function ReportsForPrincipal() {
                             <LineChart />
                         </Col>
                     </Row>
+                    <Divider orientation='left'>Progress of Plans in each department</Divider>
+                    <CollapseOfProgressEachDepartment />
                 </div>
             </div>
         </div>

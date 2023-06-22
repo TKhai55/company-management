@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import firebase, { db } from "../Models/firebase/config";
-import { getDocs, collection, query, where } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 const GetEmployee = () => {
   const colRef = collection(db, "users");
   const [functions, setFunctions] = useState([]);
@@ -98,4 +105,17 @@ const updateProductQuantity = async (formValues) => {
   }
 };
 
-export { GetEmployee, GetCustomer, GetProduct, AddTransactionData };
+const getDepartmentByEmployee = async (employeeID) => {
+  const docRef = doc(db, "users", employeeID);
+  const docSnap = await getDoc(docRef);
+
+  return docSnap.data();
+};
+
+export {
+  GetEmployee,
+  GetCustomer,
+  GetProduct,
+  AddTransactionData,
+  getDepartmentByEmployee,
+};

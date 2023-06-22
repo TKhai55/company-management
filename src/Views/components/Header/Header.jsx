@@ -658,7 +658,6 @@ const Header = () => {
             name="phoneNumber"
           >
             <PhoneInput
-
               country={'vn'}
               inputProps={{ value: phoneNumberCurrentUser, style: { width: "100%" } }}
               onChange={(phone) => setPhoneNumberCurrentUser(phone)}

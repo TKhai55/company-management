@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./Transaction.css";
 import Header from "../components/Header/Header";
 import SideMenu from "../components/SideMenu/SideMenu";
@@ -19,6 +19,7 @@ import {
   GetEmployee,
   GetProduct,
   AddTransactionData,
+  getDepartmentByEmployee,
 } from "../../Controls/TransactionController";
 
 const Transaction = () => {
@@ -35,6 +36,7 @@ const Transaction = () => {
   const { TextArea } = Input;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
 
   const [formValue, setFormValue] = useState({
     name: null,
@@ -104,10 +106,11 @@ const Transaction = () => {
   const handleSelectChange = (field, value) => {
     setFormValue((prevValues) => ({
       ...prevValues,
-      [field]: value,
+      [field]: value
     }));
   };
   const handleOk = () => {
+    getDepartmentByEmployee(formValue.nguoigiaodichID).then(data => formValue.department = data.department)
     form.validateFields().then((values) => {
       if (
         !values.nguoigiaodichID ||
@@ -126,6 +129,7 @@ const Transaction = () => {
       setConfirmLoading(true);
       setTimeout(async () => {
         const documentID = await AddTransactionData(formValue);
+
         if (documentID) message.success("Create transaction successfully!");
         handleResetContent();
         setIsModalVisible(false);
@@ -289,7 +293,7 @@ const Transaction = () => {
                         formatter={(value) =>
                           value
                             ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") +
-                              "đ"
+                            "đ"
                             : null
                         }
                         parser={(value) => value.replace(/\đ\s?|(,*)/g, "")}

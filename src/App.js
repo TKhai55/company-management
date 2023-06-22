@@ -27,12 +27,12 @@ function App() {
     <AuthProvider>
       <MenuProvider>
         <Routes>
-          <Route element={<Login />} path="/" />
+          <Route path="/" element={<Login />} />
           <Route path="/news" element={<News />} />
           <Route path="/news/:newsID" element={<NewsDetails />} />
           <Route path="/myposts" element={<MyPosts />} />
-          <Route element={<HomePage />} path="/homepage" />
-          <Route element={<Chatbox />} path="/chatbox" />
+          <Route path="/homepage" element={<HomePage />} />
+          <Route path="/chatbox" element={<Chatbox />} />
           <Route path="/createacc" element={<CreateAccount />} />
           <Route path="/manageacc" element={<ManageAccount />} />
           <Route path="/createrole" element={<CreateRole />} />
@@ -44,8 +44,11 @@ function App() {
           <Route path="/transaction" element={<Transaction />} />
           <Route path="/makeplan" element={<MakePlan />} />
           <Route path="/video" element={<JitsiMeet />} />
-          <Route path="/report/:idDepartment" element={<ReportsForManager />} />
-          <Route path="/report" element={<ReportsForPrincipal />} />
+          <Route
+            path="/reportformanager/:idDepartment"
+            element={<ReportsForManager />}
+          />
+          <Route path="/reportforprincipal" element={<ReportsForPrincipal />} />
         </Routes>
       </MenuProvider>
     </AuthProvider>
