@@ -84,7 +84,7 @@ const Login = () => {
                 Password
               </label>
               <input
-                type="text"
+                type="password"
                 name="password"
                 className="register-form-input-component"
                 onChange={(e) => setPassword(e.target.value)}
