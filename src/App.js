@@ -25,6 +25,7 @@ import DepartmentPlan from "./Views/Department Plan/DepartmentPlan";
 import CompanyPlan from "./Views/Company Plan/CompanyPlan";
 import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
 import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
+import MyInsights from "./Views/components/Header/MyInsights/MyInsights";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
             element={<ReportsForManager />}
           />
           <Route path="/reportforprincipal" element={<ReportsForPrincipal />} />
+          <Route path="/myinsights" element={<MyInsights />} />
         </Routes>
       </MenuProvider>
     </AuthProvider>

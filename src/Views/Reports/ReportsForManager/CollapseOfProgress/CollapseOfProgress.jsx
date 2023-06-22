@@ -73,7 +73,6 @@ export default function CollapseOfProgress() {
             0
         );
 
-        console.log(plan.title, participant.displayName, { totalProfit }, { maxProfit })
         let percentageOfSuccess = (totalProfit / maxProfit) * 100;
         percentageOfSuccess = Math.min(percentageOfSuccess, 100).toFixed(2);
         return percentageOfSuccess;
@@ -85,10 +84,21 @@ export default function CollapseOfProgress() {
                 {
                     plans.map((plan, keyPlan) => (
                         <Collapse.Panel header={`${plan.title}`} key={keyPlan + 1}>
+                            <Card>
+                                <div style={{ display: "flex", flexDirection: "row" }}>
+                                    <div style={{ width: "40%" }}>{plan.name}</div>
+                                    <Tooltip title={`${percent(plan, { participantID: plan.employeeID }, transitions)}%`} color='cyan'>
+                                        <Progress percent={percent(plan, { participantID: plan.employeeID }, transitions)} strokeColor={{
+                                            from: '#108ee9',
+                                            to: '#87d068',
+                                        }} />
+                                    </Tooltip>
+                                </div>
+                            </Card>
                             {
                                 plan.participants.map(participant => {
                                     const calculatePercent = percent(plan, participant, transitions)
-                                    return (
+                                    return (participant.role.includes("Employee") &&
                                         <Card>
                                             <div style={{ display: "flex", flexDirection: "row" }}>
                                                 <div style={{ width: "40%" }}>{participant.displayName}</div>

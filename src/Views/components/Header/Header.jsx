@@ -22,7 +22,7 @@ import {
   DatePicker,
   List,
 } from "antd";
-import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, TeamOutlined } from "@ant-design/icons";
+import { AimOutlined, BellOutlined, CopyOutlined, EditOutlined, LineChartOutlined, LogoutOutlined, PlusOutlined, SolutionOutlined, TeamOutlined } from "@ant-design/icons";
 import { auth, db, storage } from "../../../Models/firebase/config";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthProvider";
@@ -188,7 +188,16 @@ const Header = () => {
       icon: <SolutionOutlined />
     },
     {
-      key: '4',
+      key: "5",
+      label: (
+        <div
+          onClick={() => navigate("/myinsights")}
+        >Personal Insights</div>
+      ),
+      icon: <LineChartOutlined />
+    },
+    {
+      key: '6',
       label: (
         <div
           onClick={() => {
