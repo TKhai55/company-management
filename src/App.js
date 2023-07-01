@@ -26,6 +26,7 @@ import CompanyPlan from "./Views/Company Plan/CompanyPlan";
 import ReportsForManager from "./Views/Reports/ReportsForManager/ReportsForManager";
 import ReportsForPrincipal from "./Views/Reports/ReportsForPrincipal/ReportsForPrincipal";
 import MyInsights from "./Views/components/Header/MyInsights/MyInsights";
+import CalendarItem from "./Views/Calendar/CalendarItem";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
           />
           <Route path="/reportforprincipal" element={<ReportsForPrincipal />} />
           <Route path="/myinsights" element={<MyInsights />} />
+          <Route path="/calendar" element={<CalendarItem />} />
         </Routes>
       </MenuProvider>
     </AuthProvider>

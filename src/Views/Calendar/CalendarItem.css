@@ -1,0 +1,12 @@
+.add-task-button-container {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .add-task-button {
+    margin-top: 5px;
+  }

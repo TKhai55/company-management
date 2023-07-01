@@ -799,7 +799,7 @@ const Header = () => {
           <BsCameraVideo
             className="icon-btn"
             onClick={() => {
-              window.open("/video", "_blank");
+              window.open(`https://852a-222-253-129-76.ngrok-free.app/CustomMeeting`, "_blank", "noreferrer");
             }}
           />
         </div>
