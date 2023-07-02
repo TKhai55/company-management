@@ -54,10 +54,7 @@ function App() {
           <Route path="/departmentplan" element={<DepartmentPlan />} />
           <Route path="/companyplan" element={<CompanyPlan />} />
           <Route path="/video" element={<JitsiMeet />} />
-          <Route
-            path="/reportformanager/:idDepartment"
-            element={<ReportsForManager />}
-          />
+          <Route path="/reportformanager" element={<ReportsForManager />} />
           <Route path="/reportforprincipal" element={<ReportsForPrincipal />} />
           <Route path="/myinsights" element={<MyInsights />} />
           <Route path="/calendar" element={<CalendarItem />} />

@@ -16,6 +16,8 @@ import {
   faFileContract,
   faPaste,
   faUsersRectangle,
+  faChartSimple,
+  faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
 
 const SideMenuController = (roleID) => {
@@ -93,6 +95,11 @@ const SideMenuController = (roleID) => {
       return <FontAwesomeIcon icon={faUsersRectangle} />;
     if (label === "Company Plan")
       return <FontAwesomeIcon icon={faUsersRectangle} />;
+    if (label === "Manager Reports")
+      return <FontAwesomeIcon icon={faChartSimple} />;
+    if (label === "Principal Reports")
+      return <FontAwesomeIcon icon={faChartSimple} />;
+    if (label === "Calendar") return <FontAwesomeIcon icon={faCalendar} />;
     return null;
   };
 

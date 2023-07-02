@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Header from '../../components/Header/Header'
 import SideMenu from '../../components/SideMenu/SideMenu'
 import { useParams } from 'react-router-dom'
@@ -9,10 +9,13 @@ import { ExportOutlined, ImportOutlined } from '@ant-design/icons'
 import { formatNumber } from '../../../Controls/ReportController'
 import PieChartPrincipal from './PieChart/PieChart'
 import CollapseOfProgress from './CollapseOfProgress/CollapseOfProgress'
+import { AuthContext } from '../../components/Context/AuthProvider'
 
 export default function ReportsForManager() {
-    const { idDepartment } = useParams()
+    const { user: { department } } = useContext(AuthContext)
     const [transitions, setTransitions] = useState([])
+
+    console.log({ department })
 
     let exportQuantity = useRef(null)
     let importQuantity = useRef(null)
@@ -22,7 +25,7 @@ export default function ReportsForManager() {
         importQuantity.current = 0
         const q = query(
             collection(db, "transition"),
-            where("department", "==", idDepartment)
+            where("department", "==", department)
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {

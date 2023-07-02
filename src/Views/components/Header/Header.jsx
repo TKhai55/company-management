@@ -799,13 +799,13 @@ const Header = () => {
           <BsCameraVideo
             className="icon-btn"
             onClick={() => {
-              window.open(`https://852a-222-253-129-76.ngrok-free.app/CustomMeeting`, "_blank", "noreferrer");
+              window.open(`https://2306-42-113-218-5.ngrok-free.app`, "_blank", "noreferrer");
             }}
           />
         </div>
-        <div className="icon-btn-container">
+        {/* <div className="icon-btn-container">
           <BsChatDots className="icon-btn" onClick={handleClickChatBox} />
-        </div>
+        </div> */}
         <Popover title="Notifications" content={notificationContent} trigger="click" getPopupContainer={trigger => trigger.parentElement}>
           <Badge
             dot={countNewNews - countCurrentNews > 0 ? true : false}

@@ -39,7 +39,7 @@ export default function MyColleagues({ isModalOpen, handleCancel, departmentID, 
             receiver: colleagueName,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-        window.open(`https://852a-222-253-129-76.ngrok-free.app/MeetingWith${colleagueName}`, "_blank", "noreferrer");
+        window.open(`https://2306-42-113-218-5.ngrok-free.app/MeetingWith${colleagueName}`, "_blank", "noreferrer");
     }
     const items = [
         {
