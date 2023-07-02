@@ -1,18 +1,19 @@
 import { Card, Collapse, Progress, Tooltip } from 'antd';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { db } from '../../../../Models/firebase/config';
 import { useParams } from 'react-router-dom';
+import { AuthContext } from '../../../components/Context/AuthProvider';
 
 export default function CollapseOfProgress() {
-    const { idDepartment } = useParams()
+    const { user: { department } } = useContext(AuthContext)
     const [transitions, setTransitions] = useState([])
     const [plans, setPlans] = useState([])
 
     useEffect(() => {
         const queryForTransactions = query(
             collection(db, "transition"),
-            where("department", "==", idDepartment)
+            where("department", "==", department)
         );
 
         const unsubscribe = onSnapshot(queryForTransactions, (snapshot) => {
@@ -27,13 +28,13 @@ export default function CollapseOfProgress() {
             setTransitions((prevTransition) => [...updatedTransition, ...prevTransition]);
         });
         return () => unsubscribe();
-    }, [idDepartment])
+    }, [department])
 
     useEffect(() => {
         const queryForPlans = query(
             collection(db, "plan"),
             (
-                where("department", "==", idDepartment),
+                where("department", "==", department),
                 where("isConfirm", "==", true)
             )
         );
@@ -50,7 +51,7 @@ export default function CollapseOfProgress() {
             setPlans((prevPlans) => [...updatedPlans, ...prevPlans]);
         });
         return () => unsubscribe();
-    }, [idDepartment])
+    }, [department])
 
 
     function percent(plan, participant, transactions) {
